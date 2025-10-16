@@ -44,7 +44,6 @@ DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 REDIS_URL=redis://localhost:6379
 QUEUE_REDIS_URL=redis://localhost:6379
 MINI_APP_URL=https://your-domain.com/miniapp
-DATA_ENCRYPTION_KEY=your_encryption_key
 REFERRAL_CRYPTO_KEY=your_crypto_key
 REFERRAL_CRYPTO_IV=your_crypto_iv
 ```
@@ -122,6 +121,7 @@ docker-compose up -d
 ### Rate Limiting Strategy
 
 The broadcaster service automatically adjusts update intervals based on active sessions:
+
 - 2-second intervals with few users
 - Up to 30 seconds with 5000+ concurrent users
 - Stays within Telegram's 30 msg/sec rate limit
