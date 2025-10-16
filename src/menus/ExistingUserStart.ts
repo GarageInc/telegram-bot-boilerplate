@@ -2,8 +2,7 @@ import { ok } from "assert";
 import { createMenu } from "../plugins/StatefulMenu.ts";
 import { type BotContext, coerceFrom } from "../context.ts";
 import type { BotDependencies } from "../dependencies.ts";
-import { start, type NativeBalancesHeld } from "../messages/index.ts";
-import { Composer } from "grammy";
+import { start } from "../messages/index.ts";
 import { w } from "w";
 
 const log = w("bot:start-menu");
@@ -24,7 +23,7 @@ export const ExistingUserStart = ({ userService }: Pick<BotDependencies, "userSe
 		.headerText(async ctx => {
 			ok(ctx.from);
 
-			return start.initial(ctx.me.username);
+			return start.initial();
 		})
 		.dynamic(async (ctx, range) => {
 			// Handle Referrals button only if user has referrals enabled
