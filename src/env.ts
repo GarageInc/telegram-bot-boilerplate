@@ -8,6 +8,8 @@ export const TELEGRAM_API_HASH = opt("TELEGRAM_API_HASH");
 export const REDIS_URL = reqd("REDIS_URL");
 export const QUEUE_REDIS_URL = reqd("QUEUE_REDIS_URL", url => new URL(url));
 
+export const MINI_APP_URL = reqd("MINI_APP_URL");
+
 export const OTLP_ENDPOINT = opt("OTLP_ENDPOINT");
 export const OTEL_SERVICE_NAME = OTLP_ENDPOINT ? reqd("OTEL_SERVICE_NAME") : undefined;
 export const OTEL_AUTH_TOKEN = opt("OTEL_AUTH_TOKEN");

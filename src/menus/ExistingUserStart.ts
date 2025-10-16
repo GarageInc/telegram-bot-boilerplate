@@ -4,6 +4,7 @@ import { type BotContext, coerceFrom } from "../context.ts";
 import type { BotDependencies } from "../dependencies.ts";
 import { clicker } from "../messages/index.ts";
 import { w } from "w";
+import { MINI_APP_URL } from "../env.ts";
 
 const log = w("bot:start-menu");
 const err = w("bot:start-menu:error");
@@ -39,7 +40,7 @@ export const ExistingUserStart = ({
 
 			return clicker.formatWelcomeMessage(userClicks, globalClicks, leaderboard, userId, userRank);
 		})
-		.webApp("🎮 Play Game", process.env.MINI_APP_URL || "https://your-domain.com/miniapp")
+		.webApp("🎮 Play Game", MINI_APP_URL)
 		.row()
 		.text("Change Display Name", ctx => ctx.sendMenu("ChangeDisplayName", { state: null }))
 		.row()
