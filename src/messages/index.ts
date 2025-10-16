@@ -142,8 +142,6 @@ export const admin = {
 			`Username: ${user.username || "N/A"}`,
 			`Referrer ID: ${user.referrerId || "N/A"}`,
 			`Referral Code: ${user.refCode || "N/A"}`,
-			// TODO: ensure user.createdAt is not null
-			`Created: ${new Date(user.createdAt ?? "").toLocaleString()}`,
 		].join("\n");
 	},
 	referralsEnabled() {
