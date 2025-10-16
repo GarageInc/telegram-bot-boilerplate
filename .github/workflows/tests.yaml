@@ -25,19 +25,6 @@ jobs:
       PG_USER: test
       PG_PASSWORD: test
       PG_DATABASE: test
-      DEXTRA_API_URL: http://localhost:3000
-      DEXTRA_API_KEY: test-key
-      JITO_AUTH_KEY: test-key
-      TURNKEY_PUBLIC_KEY: test-key
-      TURNKEY_PRIVATE_KEY: test-key
-      TURNKEY_DEFAULT_ORGANIZATION_ID: test-id
-      TURNKEY_BASE_API: http://localhost:3000
-      DATA_ENCRYPTION_KEY: test-key
-      OIDC_ISSUER_URL: http://localhost:3000
-      CODEX_API_KEY: test-key
-      REFERRAL_CRYPTO_KEY: abcdefghijklmnopqrstuvwxyzabcdef
-      REFERRAL_CRYPTO_IV: abcdefghijklmnopqrstuvwxyzabcdef
-      JUPITER_API_URL: http://localhost:3000
 
     steps:
       - uses: actions/checkout@v4

@@ -36,8 +36,6 @@ export const PG = DATABASE_URL
 			database: reqd("PG_DATABASE"),
 		};
 
-export const DATA_ENCRYPTION_KEY = reqd("DATA_ENCRYPTION_KEY");
-
 // Webhook configuration
 export const ENABLE_WEBHOOKS = opt("ENABLE_WEBHOOKS") === "true";
 export const PORT = ENABLE_WEBHOOKS ? reqd("PORT", port => parseInt(port, 10)) : undefined;

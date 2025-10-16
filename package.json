@@ -16,7 +16,8 @@
 		"getsession": "bun run scripts/generate_tg_session.ts",
 		"new-migration": "bun run drizzle-kit generate --config drizzle.config.ts --custom",
 		"migrate": "bun run drizzle-kit migrate --config drizzle.config.ts",
-		"schema": "bun run drizzle-kit introspect --config drizzle.config.ts"
+		"schema": "bun run drizzle-kit introspect --config drizzle.config.ts",
+		"ngrok:rinat": "ngrok http --url=dogfish-faithful-incredibly.ngrok-free.app 3001"
 	},
 	"devDependencies": {
 		"@0no-co/graphqlsp": "1.15.0",

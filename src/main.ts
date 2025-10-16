@@ -328,15 +328,19 @@ if (ENABLE_WEBHOOKS) {
 					headers: { "Content-Type": "text/html" },
 				});
 			}
-			
+
 			// Serve other web assets
 			if (url.pathname.startsWith("/assets/")) {
 				const file = Bun.file(`./web/dist${url.pathname}`);
-				const ext = url.pathname.split('.').pop();
-				const contentType = ext === 'js' ? 'application/javascript' 
-					: ext === 'css' ? 'text/css'
-					: ext === 'svg' ? 'image/svg+xml'
-					: 'application/octet-stream';
+				const ext = url.pathname.split(".").pop();
+				const contentType =
+					ext === "js"
+						? "application/javascript"
+						: ext === "css"
+							? "text/css"
+							: ext === "svg"
+								? "image/svg+xml"
+								: "application/octet-stream";
 				return new Response(file, {
 					headers: { "Content-Type": contentType },
 				});
