@@ -1,0 +1,43 @@
+services:
+  # PostgreSQL service
+  postgres:
+    image: postgres:14-alpine
+    hostname: db.local
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: admin
+      POSTGRES_DB: databasev1
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d databasev1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis service
+  redis:
+    image: redis:7-alpine
+    hostname: redis.local
+    ports:
+      - "6379:6379" # Map the Redis default port
+    volumes:
+      - redisdata:/data # Persist Redis data
+
+  # anvil local blockchains
+  anvil:
+    build:
+      context: .
+      dockerfile: Dockerfile-foundry
+    hostname: anvil.local
+    env_file:
+      - .env
+    ports:
+      - "9601-9609:9601-9609"
+
+volumes:
+  pgdata:
+  redisdata:

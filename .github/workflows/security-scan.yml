@@ -1,0 +1,56 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 0 * * 1" # Run weekly on Mondays
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run Bun audit
+        run: bun audit
+        continue-on-error: true # Don't fail the build, but report issues
+
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        env:
+          # Only scan production dependencies
+          MAVEN_OPTS: "-Dorg.owasp.dependencycheck.nodeaudit.skipDevDependencies=true"
+        with:
+          project: "tg-bot-new"
+          path: "."
+          format: "HTML"
+          args: >
+            --enableExperimental
+            --failOnCVSS 7
+            --exclude '**/node_modules/*/test/**'
+
+      # Upload scan results
+      - name: Upload dependency check report
+        uses: actions/upload-artifact@v4
+        if: always() # Upload even if the scan fails
+        with:
+          name: dependency-check-report
+          path: reports
+          retention-days: 7

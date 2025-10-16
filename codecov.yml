@@ -1,0 +1,41 @@
+coverage:
+  round: down
+  precision: 2
+  require_ci_to_pass: yes
+
+  status:
+    # Learn more at https://docs.codecov.io/docs/commit-status
+    project:
+      bot-new:
+        target: auto # auto compares coverage to the previous base commit
+        threshold: 1% # the leniency in hitting the target
+        base: auto
+        if_ci_failed: error
+        if_not_found: success
+
+comment:
+  layout: "reach, diff, files"
+  behavior: default # update if exists else create new
+  require_changes: true
+
+flags:
+  bot-new:
+    paths:
+      - "src/*"
+
+ignore:
+  # ignore all files of these types
+  - "**/*.json"
+  - "**/*.yml"
+  - "**/*.md"
+  # ignore these folders and all their contents
+  - "node_modules"
+  - "dist"
+  - "test"
+  - "src/tests"
+  # specific files
+  - ".github"
+  - ".vscode"
+  - "scripts"
+  - "docs"
+  - "src/main.ts"
