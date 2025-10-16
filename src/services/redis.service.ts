@@ -8,9 +8,19 @@ export interface RedisService {
 	get<T>(key: string): Promise<T | null>;
 
 	/**
+	 * Get a raw string value from Redis
+	 */
+	getString(key: string): Promise<string | null>;
+
+	/**
 	 * Set a value in Redis with optional expiration
 	 */
 	set(key: string, value: object, ttlSeconds?: number): Promise<void>;
+
+	/**
+	 * Set a raw string value in Redis
+	 */
+	setString(key: string, value: string, ttlSeconds?: number): Promise<void>;
 
 	/**
 	 * Delete a key from Redis
@@ -21,6 +31,56 @@ export interface RedisService {
 	 * Get the TTL (time to live) of a key in seconds
 	 */
 	getTtl(key: string): Promise<number>;
+
+	/**
+	 * Increment a numeric value in Redis
+	 */
+	incr(key: string): Promise<number>;
+
+	/**
+	 * Increment a numeric value by amount
+	 */
+	incrBy(key: string, amount: number): Promise<number>;
+
+	/**
+	 * Add members to a set
+	 */
+	sadd(key: string, ...members: string[]): Promise<number>;
+
+	/**
+	 * Remove members from a set
+	 */
+	srem(key: string, ...members: string[]): Promise<number>;
+
+	/**
+	 * Get all members of a set
+	 */
+	smembers(key: string): Promise<string[]>;
+
+	/**
+	 * Get the cardinality (size) of a set
+	 */
+	scard(key: string): Promise<number>;
+
+	/**
+	 * Get a hash field value
+	 */
+	hget(key: string, field: string): Promise<string | null>;
+
+	/**
+	 * Set a hash field value
+	 */
+	hset(key: string, field: string, value: string): Promise<number>;
+
+	/**
+	 * Delete hash fields
+	 */
+	hdel(key: string, ...fields: string[]): Promise<number>;
+
+	/**
+	 * Get all hash fields and values
+	 */
+	hgetall(key: string): Promise<Record<string, string>>;
 
 	/**
 	 * Close the Redis connection
@@ -84,6 +144,118 @@ export function makeRedisService(): RedisService {
 		}
 	};
 
+	const getString = async (key: string): Promise<string | null> => {
+		try {
+			return await redis.get(key);
+		} catch (error) {
+			console.error(`Error getting string key ${key} from Redis:`, error);
+			return null;
+		}
+	};
+
+	const setString = async (key: string, value: string, ttlSeconds?: number): Promise<void> => {
+		try {
+			if (ttlSeconds) {
+				await redis.setex(key, ttlSeconds, value);
+			} else {
+				await redis.set(key, value);
+			}
+		} catch (error) {
+			console.error(`Error setting string key ${key} in Redis:`, error);
+			throw error;
+		}
+	};
+
+	const incr = async (key: string): Promise<number> => {
+		try {
+			return await redis.incr(key);
+		} catch (error) {
+			console.error(`Error incrementing key ${key} in Redis:`, error);
+			throw error;
+		}
+	};
+
+	const incrBy = async (key: string, amount: number): Promise<number> => {
+		try {
+			return await redis.incrby(key, amount);
+		} catch (error) {
+			console.error(`Error incrementing key ${key} by ${amount} in Redis:`, error);
+			throw error;
+		}
+	};
+
+	const sadd = async (key: string, ...members: string[]): Promise<number> => {
+		try {
+			return await redis.sadd(key, ...members);
+		} catch (error) {
+			console.error(`Error adding to set ${key} in Redis:`, error);
+			throw error;
+		}
+	};
+
+	const srem = async (key: string, ...members: string[]): Promise<number> => {
+		try {
+			return await redis.srem(key, ...members);
+		} catch (error) {
+			console.error(`Error removing from set ${key} in Redis:`, error);
+			throw error;
+		}
+	};
+
+	const smembers = async (key: string): Promise<string[]> => {
+		try {
+			return await redis.smembers(key);
+		} catch (error) {
+			console.error(`Error getting members of set ${key} from Redis:`, error);
+			return [];
+		}
+	};
+
+	const scard = async (key: string): Promise<number> => {
+		try {
+			return await redis.scard(key);
+		} catch (error) {
+			console.error(`Error getting cardinality of set ${key} from Redis:`, error);
+			return 0;
+		}
+	};
+
+	const hget = async (key: string, field: string): Promise<string | null> => {
+		try {
+			return await redis.hget(key, field);
+		} catch (error) {
+			console.error(`Error getting hash field ${field} from ${key} in Redis:`, error);
+			return null;
+		}
+	};
+
+	const hset = async (key: string, field: string, value: string): Promise<number> => {
+		try {
+			return await redis.hset(key, field, value);
+		} catch (error) {
+			console.error(`Error setting hash field ${field} in ${key} in Redis:`, error);
+			throw error;
+		}
+	};
+
+	const hdel = async (key: string, ...fields: string[]): Promise<number> => {
+		try {
+			return await redis.hdel(key, ...fields);
+		} catch (error) {
+			console.error(`Error deleting hash fields from ${key} in Redis:`, error);
+			throw error;
+		}
+	};
+
+	const hgetall = async (key: string): Promise<Record<string, string>> => {
+		try {
+			return await redis.hgetall(key);
+		} catch (error) {
+			console.error(`Error getting all hash fields from ${key} in Redis:`, error);
+			return {};
+		}
+	};
+
 	const close = async (): Promise<void> => {
 		try {
 			await redis.quit();
@@ -94,9 +266,21 @@ export function makeRedisService(): RedisService {
 
 	return {
 		get,
+		getString,
 		set,
+		setString,
 		del,
 		getTtl,
+		incr,
+		incrBy,
+		sadd,
+		srem,
+		smembers,
+		scard,
+		hget,
+		hset,
+		hdel,
+		hgetall,
 		close,
 	};
 }

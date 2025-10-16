@@ -84,6 +84,10 @@ export const makeUserService = ({ userRepository }: Dependencies) => {
 		return await userRepository.deleteUser(userId);
 	};
 
+	const findUserByDisplayName = async (displayName: string) => {
+		return await userRepository.findUserByDisplayName(displayName);
+	};
+
 	return {
 		getUserById,
 		getOrCreateUser,
@@ -99,6 +103,7 @@ export const makeUserService = ({ userRepository }: Dependencies) => {
 		getUsersByIds,
 		deleteUser,
 		getUserByIdOrUsername,
+		findUserByDisplayName,
 	};
 };
 

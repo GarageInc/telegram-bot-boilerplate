@@ -23,6 +23,11 @@ export const otherCommands: BotCommandSetup[] = [
 			);
 		},
 	},
+	{
+		command: "changename",
+		description: "Change your display name",
+		getHandler: () => async ctx => ctx.sendMenu("ChangeDisplayName", { state: null }),
+	},
 	/**
 	 * {
 		command: "buy",

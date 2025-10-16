@@ -9,3 +9,4 @@ export * from "./RemoveUser.ts";
 export * from "./EnableReferrals.ts";
 export * from "./BulkWhitelist.ts";
 export * from "./SendMessage.ts";
+export * from "./ChangeDisplayName.ts";

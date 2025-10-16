@@ -13,7 +13,13 @@ RUN bun install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Type check the project
+# Build web app
+WORKDIR /app/web
+RUN bun install --frozen-lockfile
+RUN bun run build
+
+# Type check the main project
+WORKDIR /app
 RUN bun run check
 
 # Build stage (optional - Bun can run TypeScript directly)
@@ -31,6 +37,9 @@ RUN bun install --frozen-lockfile --production
 
 # Copy built application
 COPY --from=build /app/src ./src
+
+# Copy built web app
+COPY --from=build /app/web/dist ./web/dist
 
 # Expose port (if needed for health checks)
 EXPOSE 3000

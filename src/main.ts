@@ -36,11 +36,20 @@ import { ignoreErrors } from "./plugins/ignoreErrors.ts";
 //#region CONTENT IMPORTS
 import * as Menus from "./menus/index.ts";
 import { makeUserRepository } from "./repositories/index.ts";
-import { makeNotificationService, makeRedisService, makeSlackService, makeUserService } from "./services/index.ts";
+import {
+	makeNotificationService,
+	makeRedisService,
+	makeSlackService,
+	makeUserService,
+	makeClickerService,
+	makeLeaderboardService,
+	makeBroadcasterService,
+} from "./services/index.ts";
 import { otherCommands, startCommand } from "./command/index.ts";
 import { error } from "./messages/index.ts";
 import type { BotCommandSetup } from "./command/types.ts";
 import { formatError, getErrorMessage } from "./utils/index.ts";
+import { createClickerAPI } from "./api/clicker.api.ts";
 //#endregion
 
 if (EXTRA_TRACING.size > 0) {
@@ -134,6 +143,7 @@ export function setup(bot: Bot<BotContext>, deps: BotDependencies, sender?: { cl
 			BulkWhitelist: Menus.BulkWhitelist(deps),
 			SendMessage: Menus.SendMessage(deps),
 			RemoveUser: Menus.RemoveUser(deps),
+			ChangeDisplayName: Menus.ChangeDisplayName(deps),
 		}),
 	);
 
@@ -156,14 +166,39 @@ export function setup(bot: Bot<BotContext>, deps: BotDependencies, sender?: { cl
 		await ctx.sendMenu("ExistingUserStart", { state: null });
 	});
 
-	composer.on("message", async ctx => {
-		// Handle direct custom input.
-		/*if (ctx.message?.text) {
-			const userId = ctx.from.id;
-			const tokenInput = ctx.message.text.trim();
-			return (await Menus.pickMenuFromInput(deps.tokenDataService, userId, tokenInput, "buy"))(ctx.sendMenu);
-		}*/
+	composer.on("message:text", async ctx => {
+		// Handle display name input
+		const text = ctx.message.text.trim();
 
+		// Validate display name
+		const validateDisplayName = (name: string): boolean => {
+			return /^[a-zA-Z0-9\s]{3,20}$/.test(name);
+		};
+
+		if (!validateDisplayName(text)) {
+			await ctx.reply("❌ Invalid display name. Please use 3-20 characters (letters, numbers, spaces allowed).", {
+				parse_mode: "HTML",
+			});
+			return;
+		}
+
+		// Check if display name is already taken
+		const existing = await deps.userService.findUserByDisplayName(text);
+		if (existing && existing.id !== String(ctx.from.id)) {
+			await ctx.reply("❌ This display name is already taken. Please choose another one.", { parse_mode: "HTML" });
+			return;
+		}
+
+		// Update display name
+		await deps.userService.updateUser(String(ctx.from.id), {
+			displayName: text,
+		});
+
+		await ctx.reply(`✅ Display name set to: <b>${text}</b>`, { parse_mode: "HTML" });
+		await ctx.sendMenu("ExistingUserStart", { state: null });
+	});
+
+	composer.on("message", async ctx => {
 		// this is an unexpected message not handled by any menu
 		await ctx.sendMenu("ErrorState", {
 			state: { msg: "Unexpected message. Would you like to start over?", noTraceId: true },
@@ -180,6 +215,8 @@ const deps: BotDependencies = (() => {
 	const userRepository = makeUserRepository(db);
 
 	const redisService = makeRedisService();
+	const clickerService = makeClickerService({ redisService, userRepository });
+	const leaderboardService = makeLeaderboardService({ redisService, userRepository });
 
 	const deps: BotDependencies = {
 		sessionStorage,
@@ -187,12 +224,27 @@ const deps: BotDependencies = (() => {
 		redisService,
 		userService: makeUserService({ userRepository }),
 		slackService: makeSlackService(SLACK_WEBHOOK),
+		clickerService,
+		leaderboardService,
+		broadcasterService: null as any, // Will be initialized after bot is created
 	};
 
 	if (EXTRA_TRACING.has("services")) recursivelyTraceMethods(deps);
 
 	return deps;
 })();
+
+// Initialize broadcaster service (needs bot instance)
+const broadcasterService = makeBroadcasterService({
+	bot,
+	redisService: deps.redisService,
+	clickerService: deps.clickerService,
+	leaderboardService: deps.leaderboardService,
+});
+deps.broadcasterService = broadcasterService;
+
+// Warm up the clicker cache on startup
+deps.clickerService.warmCache().catch(err => console.error("Failed to warm clicker cache:", err));
 
 const sender: { client: TelegramClient | undefined } = { client: undefined };
 
@@ -232,7 +284,10 @@ bot.api
 
 const DEFAULT_TIMEOUT_MS = 10000;
 
-let server: Bun.Server;
+let server: any;
+
+// Create API handlers for Mini App
+const clickerAPI = createClickerAPI(deps, BOT_TOKEN);
 
 if (ENABLE_WEBHOOKS) {
 	// use the bot token as the secret path, but hash it to avoid exposing it in error logs
@@ -254,37 +309,81 @@ if (ENABLE_WEBHOOKS) {
 
 	server = Bun.serve({
 		port: PORT,
-		fetch(request) {
+		async fetch(request) {
 			const url = new URL(request.url);
-			if (url.pathname !== secretPath) return new Response("Not found", { status: 404 });
 
-			return callback(request as { headers: Headers; json: () => Promise<Update> }).catch(async err => {
-				// this is a copy of grammY's error handling behaviour for long-polling
-				// grammY chooses not to do the same handling (call `bot.catch`) for webhooks
-				// but we normalise the behaviour for webhooks to be the same as long-polling
-				// by calling errorHandler here, triggering `bot.catch`
-				// https://github.com/grammyjs/grammY/blob/fcbfc5b2e73df9f1fa332d1b98b54b874daf13ca/src/bot.ts#L333-L341
+			// API routes for Mini App
+			if (url.pathname === "/api/clicker/stats" && request.method === "GET") {
+				return clickerAPI.getStats(request);
+			}
 
-				// should always be true
-				if (err instanceof BotError) {
-					await bot.errorHandler(err);
-				} else {
-					console.error("FATAL: grammY unable to handle:", err);
-					// throw err;
-				}
+			if (url.pathname === "/api/clicker/click" && request.method === "POST") {
+				return clickerAPI.recordClick(request);
+			}
 
-				return new Response("OK", { status: 200 });
-			});
+			// Serve Mini App static files
+			if (url.pathname === "/miniapp" || url.pathname === "/miniapp/") {
+				const file = Bun.file("./web/dist/index.html");
+				return new Response(file, {
+					headers: { "Content-Type": "text/html" },
+				});
+			}
+			
+			// Serve other web assets
+			if (url.pathname.startsWith("/assets/")) {
+				const file = Bun.file(`./web/dist${url.pathname}`);
+				const ext = url.pathname.split('.').pop();
+				const contentType = ext === 'js' ? 'application/javascript' 
+					: ext === 'css' ? 'text/css'
+					: ext === 'svg' ? 'image/svg+xml'
+					: 'application/octet-stream';
+				return new Response(file, {
+					headers: { "Content-Type": contentType },
+				});
+			}
+
+			// Webhook endpoint
+			if (url.pathname === secretPath) {
+				return callback(request as { headers: Headers; json: () => Promise<Update> }).catch(async err => {
+					// this is a copy of grammY's error handling behaviour for long-polling
+					// grammY chooses not to do the same handling (call `bot.catch`) for webhooks
+					// but we normalise the behaviour for webhooks to be the same as long-polling
+					// by calling errorHandler here, triggering `bot.catch`
+					// https://github.com/grammyjs/grammY/blob/fcbfc5b2e73df9f1fa332d1b98b54b874daf13ca/src/bot.ts#L333-L341
+
+					// should always be true
+					if (err instanceof BotError) {
+						await bot.errorHandler(err);
+					} else {
+						console.error("FATAL: grammY unable to handle:", err);
+						// throw err;
+					}
+
+					return new Response("OK", { status: 200 });
+				});
+			}
+
+			return new Response("Not found", { status: 404 });
 		},
 	});
 
 	await bot.api.setWebhook(`${BOT_WEBHOOK_HOST}${secretPath}`, { secret_token: WEBHOOK_SECRET_TOKEN });
 
 	console.log("Webhook set to", `${BOT_WEBHOOK_HOST}${secretPath}`);
+	console.log(`Mini App available at: ${BOT_WEBHOOK_HOST}/miniapp`);
 	console.log(`Bot ${botInfo.first_name} (@${botInfo.username}) started in webhook mode`);
+
+	// Start broadcaster service
+	await deps.broadcasterService.start();
+	console.log("Broadcaster service started");
 } else if (process.env.NODE_ENV !== "test") {
 	bot.start({
-		onStart: botInfo => console.log(`Bot ${botInfo.first_name} (@${botInfo.username}) started in long-polling mode`),
+		onStart: async botInfo => {
+			console.log(`Bot ${botInfo.first_name} (@${botInfo.username}) started in long-polling mode`);
+			// Start broadcaster service
+			await deps.broadcasterService.start();
+			console.log("Broadcaster service started");
+		},
 	});
 }
 
@@ -314,6 +413,9 @@ async function shutdown(signal: string) {
 
 	console.log("Stopping notification queue...");
 	promises.push(deps.notificationService.close().catch(noop));
+
+	console.log("Stopping broadcaster service...");
+	promises.push(deps.broadcasterService.stop().catch(noop));
 
 	if (sdk) {
 		console.log("Stopping OpenTelemetry...");

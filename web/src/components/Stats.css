@@ -1,0 +1,23 @@
+.stats {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.stats h1 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: var(--tg-theme-text-color, #000000);
+}
+
+.stat-item {
+  margin: 8px 0;
+  font-size: 16px;
+  color: var(--tg-theme-hint-color, #999999);
+}
+
+.stat-value {
+  font-weight: bold;
+  color: var(--tg-theme-text-color, #000000);
+  font-size: 20px;
+}
+

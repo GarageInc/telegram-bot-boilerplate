@@ -1,0 +1,48 @@
+.click-button-container {
+  position: relative;
+  margin: 40px 0;
+}
+
+.click-button {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  font-size: 48px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  touch-action: manipulation;
+}
+
+.click-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
+}
+
+.click-animation {
+  position: absolute;
+  font-size: 32px;
+  font-weight: bold;
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+  color: var(--tg-theme-button-color, #667eea);
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(1.5);
+  }
+}
+

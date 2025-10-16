@@ -1,0 +1,11 @@
+.rate-limit-warning {
+  background: rgba(255, 107, 107, 0.1);
+  border: 2px solid #ff6b6b;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #ff6b6b;
+}
+

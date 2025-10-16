@@ -33,7 +33,10 @@ export const users = pgTable("users", {
 	refCode: varchar("ref_code", { length: 255 }),
 	notificationsEnabled: boolean("notifications_enabled").default(true).notNull(),
 	referralsEnabled: boolean("referrals_enabled").default(false).notNull(),
+	clickCount: integer("click_count").default(0).notNull(),
+	displayName: varchar("display_name", { length: 255 }),
 }, (table) => [
 	unique("users_ref_code_key").on(table.refCode),
+	unique("users_display_name_key").on(table.displayName),
 ]);
 

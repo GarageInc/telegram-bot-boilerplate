@@ -1,6 +1,6 @@
 import { users } from "../infra/database/index.ts";
 import type { Database } from "../infra/database/index.ts";
-import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, desc, sql, gt } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 export const makeUserRepository = (db: NodePgDatabase) => {
@@ -135,6 +135,46 @@ export const makeUserRepository = (db: NodePgDatabase) => {
 		return result[0] ?? null;
 	};
 
+	/**
+	 * Get top N users by click count for leaderboard.
+	 */
+	const getTopClickerUsers = async (limit: number = 20) => {
+		const result = await db
+			.select()
+			.from(users)
+			.orderBy(desc(users.clickCount))
+			.limit(limit);
+		return result;
+	};
+
+	/**
+	 * Get user's rank in the leaderboard.
+	 * Returns null if user has 0 clicks.
+	 */
+	const getUserRank = async (userId: string): Promise<number | null> => {
+		const user = await findById(userId);
+		if (!user || !user.clickCount || user.clickCount === 0) {
+			return null;
+		}
+
+		// Count users with more clicks
+		const result = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(users)
+			.where(gt(users.clickCount, user.clickCount));
+
+		const rank = (result[0]?.count ?? 0) + 1;
+		return rank;
+	};
+
+	/**
+	 * Find user by display name.
+	 */
+	const findUserByDisplayName = async (displayName: string) => {
+		const result = await db.select().from(users).where(eq(users.displayName, displayName));
+		return result.length > 0 ? result[0] : null;
+	};
+
 	return {
 		findAll,
 		findById,
@@ -148,6 +188,9 @@ export const makeUserRepository = (db: NodePgDatabase) => {
 		findWhitelistedIdsByIds,
 		findByIds,
 		deleteUser,
+		getTopClickerUsers,
+		getUserRank,
+		findUserByDisplayName,
 	};
 };
 

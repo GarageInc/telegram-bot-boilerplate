@@ -1,0 +1,22 @@
+.combo-indicator {
+  text-align: center;
+  margin-top: 20px;
+  min-height: 30px;
+}
+
+.combo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff6b6b;
+  animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+

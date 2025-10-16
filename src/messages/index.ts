@@ -125,6 +125,73 @@ export const setReferralCode = {
 	},
 };
 
+// Helper functions
+export function escapeHtml(text: string): string {
+	return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+export function formatNumber(num: number): string {
+	return num.toLocaleString("en-US");
+}
+
+export const clicker = {
+	welcome() {
+		return "🎮 <b>Welcome to the Clicker Game!</b>\n\nChoose a display name to get started:";
+	},
+	setDisplayName() {
+		return "Please enter your display name (3-20 characters):";
+	},
+	invalidDisplayName() {
+		return "❌ Invalid display name. Please use 3-20 characters (letters, numbers, spaces allowed).";
+	},
+	displayNameTaken() {
+		return "❌ This display name is already taken. Please choose another one.";
+	},
+	displayNameSuccess(displayName: string) {
+		return `✅ Display name set to: <b>${displayName}</b>`;
+	},
+	changeDisplayName() {
+		return "Enter your new display name (3-20 characters):";
+	},
+	formatWelcomeMessage(
+		userClicks: number,
+		globalClicks: number,
+		leaderboard: Array<{ userId: string; displayName: string; clickCount: number; rank: number }>,
+		currentUserId: string,
+		userRank: number | null,
+	): string {
+		const lines: string[] = [];
+
+		lines.push("🎮 <b>Clicker Game</b>\n");
+		lines.push(`Your clicks: <b>${formatNumber(userClicks)}</b>`);
+
+		if (userRank !== null) {
+			lines.push(`Your rank: <b>#${userRank}</b>`);
+		}
+
+		lines.push(`Global clicks: <b>${formatNumber(globalClicks)}</b>\n`);
+
+		// Leaderboard
+		if (leaderboard.length > 0) {
+			lines.push("🏆 <b>Top 20 Clickers</b>\n");
+
+			for (const entry of leaderboard) {
+				const medal = entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : entry.rank === 3 ? "🥉" : "  ";
+				const highlight = entry.userId === currentUserId ? "👉 " : "";
+				const name = escapeHtml(entry.displayName);
+
+				lines.push(
+					`${medal} ${highlight}<code>${entry.rank}.</code> ${name}: <b>${formatNumber(entry.clickCount)}</b>`,
+				);
+			}
+		} else {
+			lines.push("🏆 No clicks yet! Be the first!");
+		}
+
+		return lines.join("\n");
+	},
+};
+
 export const admin = {
 	header() {
 		return "Admin Panel";

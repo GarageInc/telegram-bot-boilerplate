@@ -16,11 +16,16 @@ export const command: BotCommandSetup = {
 			return;
 		}
 
-		// this method finds or creates the user
-		const user = await deps.userService.getOrCreateUser(id, username);
-		if (!user) return ctx.sendMenu("NewUserStart", { state: null });
+	// this method finds or creates the user
+	const user = await deps.userService.getOrCreateUser(id, username);
+	if (!user) return ctx.sendMenu("NewUserStart", { state: null });
 
-		await ctx.sendMenu("ExistingUserStart", { state: null });
+	// Check if user has a display name set
+	if (!user.displayName) {
+		return ctx.sendMenu("NewUserStart", { state: null });
+	}
+
+	await ctx.sendMenu("ExistingUserStart", { state: null });
 	},
 };
 
@@ -87,6 +92,11 @@ async function handleNewReferralUser(
 
 	if (!user) return;
 
+	// Check if user has a display name set
+	if (!user.displayName) {
+		return ctx.sendMenu("NewUserStart", { state: null });
+	}
+
 	await ctx.sendMenu("ExistingUserStart", { state: null });
 }
 
@@ -108,12 +118,21 @@ async function handleExistingUserReferral(
 ) {
 	// If user already has a referrer, just show the menu
 	if (referral.referrerId) {
+		// Check if user has a display name set
+		if (!referral.displayName) {
+			return ctx.sendMenu("NewUserStart", { state: null });
+		}
 		await ctx.sendMenu("ExistingUserStart", { state: null });
 		return;
 	}
 
 	// Update user's referrer
 	await userService.updateUser(referral.id, { referrerId: referrer.id });
+
+	// Check if user has a display name set
+	if (!referral.displayName) {
+		return ctx.sendMenu("NewUserStart", { state: null });
+	}
 
 	await ctx.sendMenu("ExistingUserStart", { state: null });
 }
