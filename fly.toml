@@ -1,0 +1,61 @@
+# fly.toml app configuration file generated for clicker-bot
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "clicker-bot"
+primary_region = "fra" # Frankfurt (same as your Render setup)
+
+[build]
+  dockerfile = "./bot/Dockerfile"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "10s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/health"
+
+[checks]
+  [checks.health]
+    port = 3000
+    type = "http"
+    interval = "15s"
+    timeout = "10s"
+    grace_period = "30s"
+    method = "get"
+    path = "/health"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+# Secrets (set these via: fly secrets set SECRET_NAME=value)
+# Required secrets to set:
+# - BOT_TOKEN
+# - DATABASE_URL
+# - REDIS_URL
+# - QUEUE_REDIS_URL
+# - REFERRAL_CRYPTO_KEY
+# - REFERRAL_CRYPTO_IV
+# - MINI_APP_URL
+# - BOT_WEBHOOK_HOST
+# - WEBHOOK_SECRET_TOKEN (optional, for webhook security)
+# - ENABLE_WEBHOOKS=true
+# - SLACK_WEBHOOK (optional, for error notifications)
+# - TELEGRAM_API_ID (optional, for fastSend)
+# - TELEGRAM_API_HASH (optional, for fastSend)
+
