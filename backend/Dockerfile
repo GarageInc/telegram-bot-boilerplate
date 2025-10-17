@@ -5,6 +5,7 @@ WORKDIR /app
 # Copy backend files
 COPY backend/package.json ./backend/package.json
 COPY backend/bunfig.toml ./backend/bunfig.toml
+COPY backend/drizzle.config.ts ./backend/drizzle.config.ts
 
 # Install dependencies
 WORKDIR /app/backend
