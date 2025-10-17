@@ -1,0 +1,9 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Fly.io environment files (contain secrets)
+.env.fly
+.env.fly.*
+

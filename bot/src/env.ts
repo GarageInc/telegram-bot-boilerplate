@@ -22,6 +22,8 @@ export const SHUTDOWN_TIMEOUT_MS = opt("SHUTDOWN_TIMEOUT_MS", ms => (ms != null 
 // Database connection details
 export const DATABASE_URL = opt("DATABASE_URL", url => url && new URL(url));
 
+console.log("DATABASE_URL", DATABASE_URL);
+
 export const PG = DATABASE_URL
 	? {
 			host: DATABASE_URL.hostname,
@@ -39,6 +41,8 @@ export const PG = DATABASE_URL
 			database: reqd("PG_DATABASE"),
 			ssl: { rejectUnauthorized: false },
 		};
+
+console.log("PG", PG);
 
 // Webhook configuration
 export const ENABLE_WEBHOOKS = opt("ENABLE_WEBHOOKS") === "true";
