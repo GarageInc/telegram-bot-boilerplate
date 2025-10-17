@@ -7,7 +7,7 @@
 	"scripts": {
 		"dev": "bun run migrate && bun run --watch src/main.ts",
 		"build": "bun run migrate && bun run src/main.ts",
-		"start": "bun run migrate && bun run src/main.ts",
+		"start": "bun run src/main.ts",
 		"check": "tsc --noEmit",
 		"fmt": "prettier --write .",
 		"lint": "bun oxlint --fix",
