@@ -194,7 +194,6 @@ export function setup(bot: Bot<BotContext>, deps: BotDependencies, sender?: { cl
 			displayName: text,
 		});
 
-		await ctx.reply(`✅ Display name set to: <b>${text}</b>`, { parse_mode: "HTML" });
 		await ctx.sendMenu("ExistingUserStart", { state: null });
 	});
 
