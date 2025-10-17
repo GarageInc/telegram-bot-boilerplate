@@ -2,8 +2,8 @@ import type { Bot } from "grammy";
 import type { BotContext } from "../context.ts";
 import type { RedisService } from "./redis.service.ts";
 import { clicker } from "../messages/index.ts";
-import { ClickerService } from "../../../common/services/clicker.service.ts";
-import { LeaderboardService } from "../../../common/services/leaderboard.service.ts";
+import type { ClickerService } from "@common/services/clicker.service.ts";
+import type { LeaderboardService } from "@common/services/leaderboard.service.ts";
 
 export class BroadcasterServiceError extends Error {}
 

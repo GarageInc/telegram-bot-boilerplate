@@ -43,8 +43,8 @@ import {
 	makeUserService,
 	makeBroadcasterService,
 } from "./services/index.ts";
-import { makeClickerService } from "../../common/services/clicker.service.ts";
-import { makeLeaderboardService } from "../../common/services/leaderboard.service.ts";
+import { makeClickerService } from "@common/services/clicker.service.ts";
+import { makeLeaderboardService } from "@common/services/leaderboard.service.ts";
 import { otherCommands, startCommand } from "./command/index.ts";
 import { error } from "./messages/index.ts";
 import type { BotCommandSetup } from "./command/types.ts";

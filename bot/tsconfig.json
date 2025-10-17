@@ -25,6 +25,10 @@
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false,
 
+		"paths": {
+			"@common/*": ["../common/*"]
+		},
+
 		// graphql-codegen recommends doing this
 		// but since Bun does not run postinstall by default, this probably doesn't work
 		"plugins": [
