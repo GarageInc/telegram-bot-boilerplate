@@ -40,11 +40,11 @@ export const PG = DATABASE_URL
 			ssl: { rejectUnauthorized: false },
 		};
 
-
-console.log("PG", PG);
-
 // Webhook configuration
 export const ENABLE_WEBHOOKS = opt("ENABLE_WEBHOOKS") === "true";
+
+console.log("ENABLE_WEBHOOKS", ENABLE_WEBHOOKS);
+
 export const PORT = ENABLE_WEBHOOKS ? reqd("PORT", port => parseInt(port, 10)) : undefined;
 export const BOT_WEBHOOK_HOST = ENABLE_WEBHOOKS ? reqd("BOT_WEBHOOK_HOST") : undefined;
 export const WEBHOOK_SECRET_TOKEN = ENABLE_WEBHOOKS ? reqd("WEBHOOK_SECRET_TOKEN") : undefined;
