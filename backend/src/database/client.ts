@@ -7,15 +7,8 @@ if (!DATABASE_URL) {
 	throw new Error("DATABASE_URL is required");
 }
 
-const url = new URL(DATABASE_URL);
-
 const pool = new pg.Pool({
-	host: url.hostname,
-	port: parseInt(url.port) || 5432,
-	user: url.username,
-	password: url.password,
-	database: url.pathname.slice(1),
-	ssl: { rejectUnauthorized: false },
+	connectionString: DATABASE_URL,
 });
 
 export const db = drizzle(pool);
