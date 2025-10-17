@@ -64,17 +64,8 @@ services:
           name: clicker-redis
           type: redis
           property: connectionString
-      - key: ENABLE_WEBHOOKS
-        value: true
-      - key: BOT_WEBHOOK_HOST
-        fromService:
-          name: clicker-bot
-          type: web
-          property: host
       - key: PORT
         value: 3000
-      - key: DATA_ENCRYPTION_KEY
-        sync: false
       - key: REFERRAL_CRYPTO_KEY
         sync: false
       - key: REFERRAL_CRYPTO_IV
