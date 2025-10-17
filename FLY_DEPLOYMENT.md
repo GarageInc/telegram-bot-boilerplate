@@ -22,7 +22,7 @@ This guide explains how to deploy the Telegram bot to Fly.io.
 
 ```bash
 # Create a new app (or use the existing fly.toml)
-fly apps create clicker-bot --org personal
+fly apps create ggclicker-bot --org personal
 ```
 
 ### 2. Set Up PostgreSQL Database
@@ -32,7 +32,7 @@ fly apps create clicker-bot --org personal
 fly postgres create --name clicker-postgres --region fra
 
 # Attach it to your app
-fly postgres attach clicker-postgres --app clicker-bot
+fly postgres attach clicker-postgres --app ggclicker-bot
 # This automatically sets DATABASE_URL as a secret
 ```
 
@@ -46,70 +46,70 @@ fly redis create --name clicker-redis --region fra --plan free
 fly redis status clicker-redis
 
 # Set the Redis URLs as secrets
-fly secrets set REDIS_URL="redis://[your-redis-url]:6379" --app clicker-bot
-fly secrets set QUEUE_REDIS_URL="redis://[your-redis-url]:6379" --app clicker-bot
+fly secrets set REDIS_URL="redis://[your-redis-url]:6379" --app ggclicker-bot
+fly secrets set QUEUE_REDIS_URL="redis://[your-redis-url]:6379" --app ggclicker-bot
 ```
 
 ### 4. Set Required Secrets
 
 ```bash
 # Bot configuration
-fly secrets set BOT_TOKEN="your-telegram-bot-token" --app clicker-bot
-fly secrets set BOT_WEBHOOK_HOST="https://clicker-bot.fly.dev" --app clicker-bot
-fly secrets set ENABLE_WEBHOOKS="true" --app clicker-bot
+fly secrets set BOT_TOKEN="your-telegram-bot-token" --app ggclicker-bot
+fly secrets set BOT_WEBHOOK_HOST="https://ggclicker-bot.fly.dev" --app ggclicker-bot
+fly secrets set ENABLE_WEBHOOKS="true" --app ggclicker-bot
 
 # Referral encryption keys (generate random strings)
-fly secrets set REFERRAL_CRYPTO_KEY="your-32-character-hex-key" --app clicker-bot
-fly secrets set REFERRAL_CRYPTO_IV="your-16-character-hex-iv" --app clicker-bot
+fly secrets set REFERRAL_CRYPTO_KEY="your-32-character-hex-key" --app ggclicker-bot
+fly secrets set REFERRAL_CRYPTO_IV="your-16-character-hex-iv" --app ggclicker-bot
 
 # Mini app URL
-fly secrets set MINI_APP_URL="https://your-webapp-url.com" --app clicker-bot
+fly secrets set MINI_APP_URL="https://your-webapp-url.com" --app ggclicker-bot
 
 # Optional: Webhook security
-fly secrets set WEBHOOK_SECRET_TOKEN="your-random-secret-token" --app clicker-bot
+fly secrets set WEBHOOK_SECRET_TOKEN="your-random-secret-token" --app ggclicker-bot
 
 # Optional: Slack notifications
-fly secrets set SLACK_WEBHOOK="https://hooks.slack.com/..." --app clicker-bot
+fly secrets set SLACK_WEBHOOK="https://hooks.slack.com/..." --app ggclicker-bot
 
 # Optional: Fast send (MTProto)
-fly secrets set TELEGRAM_API_ID="your-api-id" --app clicker-bot
-fly secrets set TELEGRAM_API_HASH="your-api-hash" --app clicker-bot
+fly secrets set TELEGRAM_API_ID="your-api-id" --app ggclicker-bot
+fly secrets set TELEGRAM_API_HASH="your-api-hash" --app ggclicker-bot
 ```
 
 ### 5. Deploy
 
 ```bash
 # Deploy the bot
-fly deploy --app clicker-bot
+fly deploy --app ggclicker-bot
 
 # Check status
-fly status --app clicker-bot
+fly status --app ggclicker-bot
 
 # View logs
-fly logs --app clicker-bot
+fly logs --app ggclicker-bot
 ```
 
 ## Useful Commands
 
 ```bash
 # View current secrets (names only)
-fly secrets list --app clicker-bot
+fly secrets list --app ggclicker-bot
 
 # SSH into the machine
-fly ssh console --app clicker-bot
+fly ssh console --app ggclicker-bot
 
 # Scale the app
-fly scale count 1 --app clicker-bot
-fly scale memory 256 --app clicker-bot
+fly scale count 1 --app ggclicker-bot
+fly scale memory 256 --app ggclicker-bot
 
 # Check app status
-fly status --app clicker-bot
+fly status --app ggclicker-bot
 
 # View metrics
-fly dashboard --app clicker-bot
+fly dashboard --app ggclicker-bot
 
 # Restart the app
-fly apps restart clicker-bot
+fly apps restart ggclicker-bot
 ```
 
 ## Database Migrations
@@ -118,7 +118,7 @@ If you need to run database migrations:
 
 ```bash
 # SSH into the machine
-fly ssh console --app clicker-bot
+fly ssh console --app ggclicker-bot
 
 # Run your migration command
 bun run migrate
@@ -128,13 +128,13 @@ bun run migrate
 
 ```bash
 # Real-time logs
-fly logs --app clicker-bot
+fly logs --app ggclicker-bot
 
 # Health check status
-fly checks list --app clicker-bot
+fly checks list --app ggclicker-bot
 
 # Machine status
-fly machine list --app clicker-bot
+fly machine list --app ggclicker-bot
 ```
 
 ## Troubleshooting
@@ -148,24 +148,24 @@ fly machine list --app clicker-bot
 
 2. Verify the health check endpoint:
    ```bash
-   curl https://clicker-bot.fly.dev/health
+   curl https://ggclicker-bot.fly.dev/health
    ```
 
 3. Check logs:
    ```bash
-   fly logs --app clicker-bot
+   fly logs --app ggclicker-bot
    ```
 
 ### Database connection issues
 
 1. Verify DATABASE_URL is set:
    ```bash
-   fly secrets list --app clicker-bot
+   fly secrets list --app ggclicker-bot
    ```
 
 2. Test database connection:
    ```bash
-   fly ssh console --app clicker-bot
+   fly ssh console --app ggclicker-bot
    # Inside the machine:
    psql $DATABASE_URL
    ```
@@ -176,7 +176,7 @@ If the bot is running out of memory:
 
 ```bash
 # Scale up memory
-fly scale memory 512 --app clicker-bot
+fly scale memory 512 --app ggclicker-bot
 ```
 
 ## GitHub Actions CI/CD (Optional)
@@ -196,7 +196,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --app clicker-bot
+      - run: flyctl deploy --remote-only --app ggclicker-bot
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 ```
