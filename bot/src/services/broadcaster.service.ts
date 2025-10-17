@@ -201,7 +201,7 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 	/**
 	 * Force an immediate update for a specific user.
 	 */
-	const updateSession = async (refreshCallback: () => Promise<void>, userId: string): Promise<void> => {
+	const updateSession = async (userId: string): Promise<void> => {
 		const sessionData = await redisService.hget(ACTIVE_SESSIONS_KEY, userId);
 
 		if (!sessionData) return;
@@ -209,8 +209,6 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 		const session: ActiveSession = JSON.parse(sessionData);
 
 		try {
-			await refreshCallback();
-
 			session.lastUpdate = Date.now();
 			await redisService.hset(ACTIVE_SESSIONS_KEY, userId, JSON.stringify(session));
 		} catch (error: any) {
