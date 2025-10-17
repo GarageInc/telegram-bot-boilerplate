@@ -19,7 +19,7 @@ services:
     name: clicker-backend
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerContext: .
     plan: free
     region: oregon
     envVars:
@@ -43,7 +43,7 @@ services:
     name: clicker-bot
     runtime: docker
     dockerfilePath: ./bot/Dockerfile
-    dockerContext: ./bot
+    dockerContext: .
     plan: free
     region: oregon
     envVars:
