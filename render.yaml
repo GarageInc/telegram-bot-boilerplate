@@ -78,7 +78,6 @@ services:
     runtime: static
     buildCommand: cd web && bun install && bun run build
     staticPublishPath: ./web/dist
-    plan: free
     routes:
       - type: rewrite
         source: /*
