@@ -8,6 +8,17 @@ export const TELEGRAM_API_HASH = opt("TELEGRAM_API_HASH");
 export const REDIS_URL = reqd("REDIS_URL");
 export const QUEUE_REDIS_URL = reqd("QUEUE_REDIS_URL", url => new URL(url));
 
+console.log("REDIS_URL ===> ", REDIS_URL);
+console.log("QUEUE_REDIS_URL ===> ", QUEUE_REDIS_URL);
+
+if (!REDIS_URL) {
+	throw new Error("REDIS_URL is required");
+}
+
+if (!QUEUE_REDIS_URL) {
+	throw new Error("QUEUE_REDIS_URL is required");
+}
+
 export const MINI_APP_URL = reqd("MINI_APP_URL");
 
 export const OTLP_ENDPOINT = opt("OTLP_ENDPOINT");
