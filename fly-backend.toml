@@ -1,0 +1,45 @@
+# fly.toml app configuration file for ggclicker-backend
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'ggclicker-backend-4764'
+primary_region = 'ams'
+
+[build]
+  dockerfile = "./backend/Dockerfile"
+  # Build context is the parent directory (to access shared/)
+  # Run this from the project root: cd /path/to/komi/test && fly deploy -c backend/fly.toml
+
+[env]
+  BACKEND_PORT = "4000"
+  PORT = "4000"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_stop_machines = false  # Keep backend running 24/7
+  auto_start_machines = true
+  min_machines_running = 1    # Always keep 1 instance running
+  processes = ['app']
+
+  # Health check endpoint
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "10s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+# Secrets to set via: fly secrets set KEY=value --app ggclicker-backend-4764
+# Required:
+# - BOT_TOKEN (for Telegram validation)
+# - DATABASE_URL (auto-set when you attach postgres)
+# - REDIS_URL
+
