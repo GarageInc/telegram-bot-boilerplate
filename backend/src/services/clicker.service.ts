@@ -1,5 +1,5 @@
-import type { RedisService } from "./redis.service.ts";
-import type { UserRepository } from "../repositories/user.repository.ts";
+import { RedisService } from "./redis.service";
+import { UserRepository } from "./user.repository";
 
 export class ClickerServiceError extends Error {}
 

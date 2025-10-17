@@ -1,6 +1,6 @@
-import { pgTable, varchar, integer, text, timestamp, boolean, unique } from "drizzle-orm/pg-core";
-import { enumUsersStatus } from "../../../../../common/database/schema";
+import { pgTable, varchar, integer, text, timestamp, boolean, unique, pgEnum } from "drizzle-orm/pg-core";
 
+export const enumUsersStatus = pgEnum("enum_users_status", ["IDLE", "SUCCESS"]);
 
 export const messageStore = pgTable("MessageStore", {
 	id: varchar({ length: 255 }).primaryKey().notNull(),

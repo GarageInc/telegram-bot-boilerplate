@@ -26,7 +26,6 @@
 		"noPropertyAccessFromIndexSignature": false,
 
 		"paths": {
-			"@common/*": ["../common/*"]
 		},
 
 		// graphql-codegen recommends doing this

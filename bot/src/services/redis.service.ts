@@ -1,10 +1,9 @@
 import IORedis from "ioredis";
 import { REDIS_URL } from "../env.ts";
 
-// Import base RedisService from common
-import type { RedisService as BaseRedisService } from "../../../common/services/redis.service.ts";
-
-export interface RedisService extends BaseRedisService {
+export interface RedisService {
+	getString(key: string): Promise<string | null>;
+	setString(key: string, value: string, ttlSeconds?: number): Promise<void>;
 	/**
 	 * Get a value from Redis
 	 */
@@ -24,7 +23,17 @@ export interface RedisService extends BaseRedisService {
 	 * Increment a numeric value in Redis
 	 */
 	incr(key: string): Promise<number>;
+	incrBy(key: string, amount: number): Promise<number>;	
+	sadd(key: string, ...members: string[]): Promise<number>;
+	srem(key: string, ...members: string[]): Promise<number>;
+	smembers(key: string): Promise<string[]>;
+	scard(key: string): Promise<number>;
+	close(): Promise<void>;
 
+	/**
+	 * Delete a key
+	 */
+	del(key: string): Promise<void>;
 	/**
 	 * Get a hash field value
 	 */

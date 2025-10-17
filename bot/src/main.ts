@@ -42,14 +42,13 @@ import {
 	makeSlackService,
 	makeUserService,
 	makeBroadcasterService,
+	makeClickerService,
+	makeLeaderboardService,
 } from "./services/index.ts";
-import { makeClickerService } from "@common/services/clicker.service.ts";
-import { makeLeaderboardService } from "@common/services/leaderboard.service.ts";
 import { otherCommands, startCommand } from "./command/index.ts";
 import { error } from "./messages/index.ts";
 import type { BotCommandSetup } from "./command/types.ts";
 import { formatError, getErrorMessage } from "./utils/index.ts";
-import type { UserRepository } from "@common/repositories/user.repository.ts";
 //#endregion
 
 if (EXTRA_TRACING.size > 0) {
@@ -216,8 +215,8 @@ const deps: BotDependencies = (() => {
 
 	const redisService = makeRedisService();
 
-	const clickerService = makeClickerService({ redisService, userRepository: userRepository as unknown as UserRepository });
-	const leaderboardService = makeLeaderboardService({ redisService, userRepository: userRepository as unknown as UserRepository });
+	const clickerService = makeClickerService({ redisService, userRepository });
+	const leaderboardService = makeLeaderboardService({ redisService, userRepository });
 
 	const deps: BotDependencies = {
 		sessionStorage,

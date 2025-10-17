@@ -14,7 +14,6 @@
 		"allowSyntheticDefaultImports": true,
 		"types": ["bun-types"],
 		"paths": {
-			"@common/*": ["../common/*"]
 		}
 	},
 	"include": ["src/**/*"],

@@ -1,5 +1,5 @@
 import type { Database } from "../infra/database/index.ts";
-import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNotNull, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { users } from "../infra/database/drizzle/schema.ts";
 
@@ -141,6 +141,26 @@ export const makeUserRepository = (db: NodePgDatabase) => {
 		return result.length > 0 ? result[0] : null;
 	};
 
+
+	const getTopClickerUsers = async (limit: number = 20) => {
+		return await db.select().from(users).orderBy(desc(users.clickCount)).limit(limit);
+	};
+
+	const getUserRank = async (userId: string): Promise<number | null> => {
+		const user = await findById(userId);
+		if (!user || !user.clickCount || user.clickCount === 0) {
+			return null;
+		}
+
+		const result = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(users)
+			.where(gt(users.clickCount, user.clickCount));
+
+		const rank = (result[0]?.count ?? 0) + 1;
+		return rank;
+	};
+
 	return {
 		findAll,
 		findById,
@@ -155,6 +175,8 @@ export const makeUserRepository = (db: NodePgDatabase) => {
 		findByIds,
 		deleteUser,
 		findUserByDisplayName,
+		getTopClickerUsers,
+		getUserRank,
 	};
 };
 

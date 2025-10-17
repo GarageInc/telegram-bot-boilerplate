@@ -1,6 +1,6 @@
 import { eq, desc, sql, gt } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { users } from "../database/schema.ts";
+import { users } from "../database/schema";
 
 export function makeUserRepository(db: NodePgDatabase) {
 	const findAll = async () => {

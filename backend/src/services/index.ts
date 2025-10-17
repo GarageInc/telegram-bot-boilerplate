@@ -1,8 +1,8 @@
-import { makeClickerService } from "../../../common/services/clicker.service.ts";
-import { makeLeaderboardService } from "../../../common/services/leaderboard.service.ts";
-import { makeRedisService } from "../../../common/services/redis.service.ts";
-import { makeUserRepository } from "../../../common/repositories/user.repository.ts";
+import { makeClickerService } from "./clicker.service.ts";
+import { makeLeaderboardService } from "./leaderboard.service.ts";
+import { makeRedisService } from "./redis.service.ts";
 import { db } from "../database/client.ts";
+import { makeUserRepository } from "./user.repository.ts";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 

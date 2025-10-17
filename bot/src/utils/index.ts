@@ -28,7 +28,6 @@ export type PageMeta = {
 
 export const unique = <T>(array: readonly T[]): T[] => [...new Set(array)];
 
-export type FlattenedWallet = Omit<Database.Wallet, "userId" | "createdAt" | "updatedAt">;
 export const chunkedRange = <C extends Context, T>(
 	array: readonly T[],
 	rowSize: number,
@@ -218,18 +217,6 @@ export const chunk = <T>(array: T[], chunkSize: number): T[][] => {
 		chunks.push(array.slice(i, i + chunkSize));
 	}
 	return chunks;
-};
-
-// Utility function to shorten address
-export const shortenAddress = (address: string): string => {
-	return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
-
-//TODO: should be in wallet.service
-export const getWalletLabel = (wallet: Database.Wallet | undefined, labels: Record<string, string>) => {
-	//TODO: wallet cannot be null if it's not optional
-	if (!wallet) return "Unlabeled";
-	return labels[wallet.address.toLowerCase()] || wallet.address.slice(0, 6);
 };
 
 /** Case-insensitive string equality check */

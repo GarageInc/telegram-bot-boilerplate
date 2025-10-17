@@ -1,6 +1,20 @@
-import { pgTable, varchar, integer, timestamp, boolean, unique, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, varchar, integer, text, timestamp, boolean, unique, pgEnum } from "drizzle-orm/pg-core";
 
 export const enumUsersStatus = pgEnum("enum_users_status", ["IDLE", "SUCCESS"]);
+
+export const messageStore = pgTable("MessageStore", {
+	id: varchar({ length: 255 }).primaryKey().notNull(),
+	messageId: integer("message_id").notNull(),
+	userId: varchar("user_id", { length: 255 }).notNull(),
+	origin: varchar({ length: 50 }).notNull(),
+	text: text().notNull(),
+	createdAt: timestamp({ withTimezone: true, mode: "string" }).notNull(),
+	updatedAt: timestamp({ withTimezone: true, mode: "string" }).notNull(),
+});
+
+export const sequelizeMeta = pgTable("SequelizeMeta", {
+	name: varchar({ length: 255 }).primaryKey().notNull(),
+});
 
 export const users = pgTable("users", {
 	id: varchar({ length: 255 }).primaryKey().notNull(),
