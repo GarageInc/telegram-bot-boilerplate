@@ -3,8 +3,6 @@ FROM oven/bun:1.2.19 AS base
 
 WORKDIR /app
 
-# Copy common folder
-COPY common/ ./common/
 
 # Copy bot package files
 COPY bot/package.json ./package.json
@@ -21,9 +19,6 @@ COPY bot/src/ ./src/
 FROM oven/bun:1.2.19-slim AS production
 
 WORKDIR /app
-
-# Copy common folder
-COPY common/ ./common/
 
 # Copy bot package files
 COPY bot/package.json ./package.json

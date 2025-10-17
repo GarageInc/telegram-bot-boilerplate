@@ -2,8 +2,6 @@ FROM oven/bun:1.2.19
 
 WORKDIR /app
 
-# Copy common folder
-COPY common/ ./common/
 
 # Copy backend files
 COPY backend/package.json ./package.json
