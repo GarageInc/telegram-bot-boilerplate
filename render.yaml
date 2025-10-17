@@ -12,6 +12,7 @@ services:
     plan: free
     region: oregon
     maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
 
   # Express Backend API
   - type: web
@@ -78,7 +79,6 @@ services:
     buildCommand: cd web && bun install && bun run build
     staticPublishPath: ./web/dist
     plan: free
-    region: oregon
     routes:
       - type: rewrite
         source: /*
