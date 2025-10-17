@@ -287,8 +287,6 @@ bot.api
 
 const DEFAULT_TIMEOUT_MS = 10000;
 
-let server: any;
-
 if (ENABLE_WEBHOOKS) {
 	// use the bot token as the secret path, but hash it to avoid exposing it in error logs
 	const secretPath = `/bot/webhook/${hash("sha256", BOT_TOKEN).slice(0, 20)}`;
@@ -304,26 +302,6 @@ if (ENABLE_WEBHOOKS) {
 			} catch (error) {
 				console.error("Error sending Slack message", getErrorMessage(error));
 			}
-		},
-	});
-
-	server = Bun.serve({
-		port: PORT,
-		fetch(request) {
-			const url = new URL(request.url);
-
-			if (url.pathname === secretPath) {
-				return callback(request as { headers: Headers; json: () => Promise<Update> }).catch(async err => {
-					if (err instanceof BotError) {
-						await bot.errorHandler(err);
-					} else {
-						console.error("FATAL: grammY unable to handle:", err);
-					}
-					return new Response("OK", { status: 200 });
-				});
-			}
-
-			return new Response("Not found", { status: 404 });
 		},
 	});
 
@@ -355,11 +333,6 @@ async function shutdown(signal: string) {
 	console.log(`${signal} received`);
 
 	const promises: (Promise<unknown> | undefined)[] = [];
-
-	if (server) {
-		console.log("Stopping server...");
-		promises.push(server.stop());
-	}
 
 	console.log("Stopping bot...");
 	promises.push(bot.stop());
