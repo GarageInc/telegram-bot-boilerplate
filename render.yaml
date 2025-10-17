@@ -48,6 +48,8 @@ services:
     region: frankfurt
     healthCheckPath: /health
     envVars:
+      - key: MINI_APP_URL
+        sync: false
       - key: BOT_TOKEN
         sync: false
       - key: DATABASE_URL
