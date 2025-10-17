@@ -1,12 +1,11 @@
-services:
-  # PostgreSQL Database
-  - type: pserv
-    name: clicker-postgres
+databases:
+  - name: clicker-postgres
+    databaseName: clicker_db
+    user: clicker_user
     plan: free
     region: oregon
-    databaseName: clicker_db
-    databaseUser: clicker_user
 
+services:
   # Redis Instance
   - type: redis
     name: clicker-redis
