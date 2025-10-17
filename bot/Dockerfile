@@ -9,11 +9,20 @@ COPY bot/bun.lock ./bot/bun.lock
 COPY bot/bunfig.toml ./bot/bunfig.toml
 COPY bot/drizzle.config.ts ./bot/drizzle.config.ts
 
-# Install dependencies
+# Copy shared package files
+COPY shared/package.json ./shared/package.json
+COPY shared/bun.lock ./shared/bun.lock
+
+# Install bot dependencies
 WORKDIR /app/bot
 RUN bun install
 
+# Install shared dependencies
+WORKDIR /app/shared
+RUN bun install
+
 # Copy shared services
+WORKDIR /app
 COPY shared/ /app/shared/
 
 # Copy bot source
@@ -30,11 +39,20 @@ COPY bot/bun.lock ./bot/bun.lock
 COPY bot/bunfig.toml ./bot/bunfig.toml
 COPY bot/drizzle.config.ts ./bot/drizzle.config.ts
 
+# Copy shared package files
+COPY shared/package.json ./shared/package.json
+COPY shared/bun.lock ./shared/bun.lock
+
 # Install production dependencies
 WORKDIR /app/bot
 RUN bun install
 
+# Install shared dependencies
+WORKDIR /app/shared
+RUN bun install
+
 # Copy shared services
+WORKDIR /app
 COPY shared/ /app/shared/
 
 # Copy source from build stage
