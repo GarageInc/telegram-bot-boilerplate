@@ -39,7 +39,7 @@ services:
     healthCheckPath: /health
 
   # Telegram Bot (runs as web service with long polling)
-  - type: web
+  - type: worker
     name: clicker-bot
     runtime: docker
     dockerfilePath: ./bot/Dockerfile
