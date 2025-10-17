@@ -38,14 +38,15 @@ services:
           property: connectionString
     healthCheckPath: /health
 
-  # Telegram Bot (runs as web service with long polling)
-  - type: worker
+  # Telegram Bot (runs as web service with webhooks)
+  - type: web
     name: clicker-bot
     runtime: docker
     dockerfilePath: ./bot/Dockerfile
     dockerContext: .
     plan: free
     region: oregon
+    healthCheckPath: /health
     envVars:
       - key: BOT_TOKEN
         sync: false
@@ -64,7 +65,14 @@ services:
           type: redis
           property: connectionString
       - key: ENABLE_WEBHOOKS
-        value: false
+        value: true
+      - key: BOT_WEBHOOK_HOST
+        fromService:
+          name: clicker-bot
+          type: web
+          property: host
+      - key: PORT
+        value: 3000
       - key: DATA_ENCRYPTION_KEY
         sync: false
       - key: REFERRAL_CRYPTO_KEY

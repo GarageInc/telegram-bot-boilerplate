@@ -309,11 +309,37 @@ if (ENABLE_WEBHOOKS) {
 	await bot.api.setWebhook(`${BOT_WEBHOOK_HOST}${secretPath}`, { secret_token: WEBHOOK_SECRET_TOKEN });
 
 	console.log("Webhook set to", `${BOT_WEBHOOK_HOST}${secretPath}`);
+
+	// Start HTTP server for webhooks
+	const server = Bun.serve({
+		port: PORT,
+		async fetch(req) {
+			const url = new URL(req.url);
+
+			// Health check endpoint
+			if (url.pathname === "/health") {
+				return new Response("OK", { status: 200 });
+			}
+
+			// Webhook endpoint
+			if (url.pathname === secretPath && req.method === "POST") {
+				return await callback(req as any);
+			}
+
+			// 404 for all other routes
+			return new Response("Not Found", { status: 404 });
+		},
+	});
+
+	console.log(`HTTP server listening on port ${PORT}`);
 	console.log(`Bot ${botInfo.first_name} (@${botInfo.username}) started in webhook mode`);
 
 	// Start broadcaster service
 	await deps.broadcasterService.start();
 	console.log("Broadcaster service started in webhook mode");
+
+	// Store server reference for shutdown
+	(globalThis as any).__bunServer = server;
 } else if (process.env.NODE_ENV !== "test") {
 	bot.start({
 		onStart: async botInfo => {
@@ -352,6 +378,13 @@ async function shutdown(signal: string) {
 
 	console.log("Stopping periodic sync...");
 	deps.clickerService.stopPeriodicSync();
+
+	// Stop HTTP server if running
+	const server = (globalThis as any).__bunServer;
+	if (server) {
+		console.log("Stopping HTTP server...");
+		promises.push(Promise.resolve(server.stop()));
+	}
 
 	if (sdk) {
 		console.log("Stopping OpenTelemetry...");
