@@ -29,6 +29,8 @@ COPY backend/src/ /app/backend/src/
 # Expose port
 EXPOSE 4000
 
+WORKDIR /app/backend
+
 # Start server
 CMD ["bun", "start"]
 

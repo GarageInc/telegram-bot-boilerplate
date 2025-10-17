@@ -65,5 +65,7 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV BUN_ENV=production
 
+WORKDIR /app/bot
+
 # Start the bot
 CMD ["bun", "run", "start"] 
