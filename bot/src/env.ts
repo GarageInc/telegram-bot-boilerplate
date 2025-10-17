@@ -22,10 +22,11 @@ export const SHUTDOWN_TIMEOUT_MS = opt("SHUTDOWN_TIMEOUT_MS", ms => (ms != null 
 // Database connection details
 export const DATABASE_URL = opt("DATABASE_URL", url => url && new URL(url));
 
+console.log("DATABASE_URL", DATABASE_URL);
 export const PG = DATABASE_URL
 	? {
 			host: DATABASE_URL.hostname,
-			port: parseInt(DATABASE_URL.port, 10),
+			port: parseInt(DATABASE_URL.port, 10) || 5432,
 			user: DATABASE_URL.username,
 			password: DATABASE_URL.password,
 			database: DATABASE_URL.pathname.slice(1),
@@ -37,6 +38,8 @@ export const PG = DATABASE_URL
 			password: reqd("PG_PASSWORD"),
 			database: reqd("PG_DATABASE"),
 		};
+
+console.log("PG", PG);
 
 // Webhook configuration
 export const ENABLE_WEBHOOKS = opt("ENABLE_WEBHOOKS") === "true";
