@@ -45,8 +45,6 @@ export const ExistingUserStart = ({
 		.text("Change Display Name", ctx => ctx.sendMenu("ChangeDisplayName", { state: null }))
 		.row()
 		.text("↻ Refresh", async ctx => {
-			await ctx.answerCallbackQuery({ text: "Refreshing..." });
-
 			// Register session for live updates
 			if (ctx.callbackQuery?.message) {
 				await broadcasterService.registerSession(
@@ -56,10 +54,9 @@ export const ExistingUserStart = ({
 				);
 			}
 
-			// Force immediate update
-			await broadcasterService.updateSession(String(ctx.from!.id));
-
-		    await ctx.sendMenu("ExistingUserStart"); 
+// 			await broadcasterService.updateSession(String(ctx.from!.id));
+			await ctx.answerCallbackQuery({ text: "Refreshing..." });
+			await ctx.sendMenu("ExistingUserStart", { state: null });
 		})
 		.dynamic(async (ctx, range) => {
 			// Handle Referrals button only if user has referrals enabled

@@ -16,16 +16,16 @@ export const command: BotCommandSetup = {
 			return;
 		}
 
-	// this method finds or creates the user
-	const user = await deps.userService.getOrCreateUser(id, username);
-	if (!user) return ctx.sendMenu("NewUserStart", { state: null });
+		// this method finds or creates the user
+		const user = await deps.userService.getOrCreateUser(id, username);
+		if (!user) return ctx.sendMenu("NewUserStart", { state: null });
 
-	// Check if user has a display name set
-	if (!user.displayName) {
-		return ctx.sendMenu("NewUserStart", { state: null });
-	}
+		// Check if user has a display name set
+		if (!user.displayName) {
+			return ctx.sendMenu("NewUserStart", { state: null });
+		}
 
-	await ctx.sendMenu("ExistingUserStart", { state: null });
+		await ctx.sendMenu("ExistingUserStart", { state: null });
 	},
 };
 
