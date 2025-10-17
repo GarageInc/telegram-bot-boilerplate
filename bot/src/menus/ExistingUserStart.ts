@@ -57,7 +57,7 @@ export const ExistingUserStart = ({
 			}
 
 			// Force immediate update
-			await broadcasterService.updateSession(async () => { await ctx.sendMenu("ExistingUserStart", { state: null }); }, String(ctx.from!.id));
+			await broadcasterService.updateSession(async () => { await ctx.sendMenu("ExistingUserStart", { state: ctx.menu.state }); }, String(ctx.from!.id));
 		})
 		.dynamic(async (ctx, range) => {
 			// Handle Referrals button only if user has referrals enabled
