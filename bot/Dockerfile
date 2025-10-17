@@ -8,6 +8,7 @@ WORKDIR /app
 COPY bot/package.json ./package.json
 COPY bot/bun.lock ./bun.lock
 COPY bot/bunfig.toml ./bunfig.toml
+COPY bot/drizzle.config.ts ./drizzle.config.ts
 
 # Install dependencies
 RUN bun install --frozen-lockfile
@@ -24,6 +25,7 @@ WORKDIR /app
 COPY bot/package.json ./package.json
 COPY bot/bun.lock ./bun.lock
 COPY bot/bunfig.toml ./bunfig.toml
+COPY bot/drizzle.config.ts ./drizzle.config.ts
 
 # Install production dependencies
 RUN bun install --frozen-lockfile --production
