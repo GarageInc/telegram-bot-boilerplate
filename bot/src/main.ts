@@ -246,6 +246,9 @@ deps.broadcasterService = broadcasterService;
 // Warm up the clicker cache on startup
 deps.clickerService.warmCache().catch((err: Error) => console.error("Failed to warm clicker cache:", err));
 
+// Start periodic sync for active users
+deps.clickerService.startPeriodicSync();
+
 const sender: { client: TelegramClient | undefined } = { client: undefined };
 
 if (TELEGRAM_API_ID && TELEGRAM_API_HASH) {
@@ -372,6 +375,9 @@ async function shutdown(signal: string) {
 
 	console.log("Stopping broadcaster service...");
 	promises.push(deps.broadcasterService.stop().catch(noop));
+
+	console.log("Stopping periodic sync...");
+	deps.clickerService.stopPeriodicSync();
 
 	if (sdk) {
 		console.log("Stopping OpenTelemetry...");

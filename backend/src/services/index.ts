@@ -19,6 +19,9 @@ export async function initServices() {
 	// Warm cache
 	await clickerService.warmCache();
 
+	// Start periodic sync for active users
+	clickerService.startPeriodicSync();
+
 	console.log("Services initialized");
 }
 

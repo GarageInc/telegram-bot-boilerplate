@@ -9,6 +9,8 @@ export interface RedisService {
 	srem(key: string, ...members: string[]): Promise<number>;
 	smembers(key: string): Promise<string[]>;
 	scard(key: string): Promise<number>;
+	sismember(key: string, member: string): Promise<boolean>;
+	keys(pattern: string): Promise<string[]>;
 	close(): Promise<void>;
 }
 
@@ -99,6 +101,25 @@ export function makeRedisService(redisUrl: string): RedisService {
 		}
 	};
 
+	const sismember = async (key: string, member: string): Promise<boolean> => {
+		try {
+			const result = await redis.sismember(key, member);
+			return result === 1;
+		} catch (error) {
+			console.error(`Error checking if ${member} is in set ${key}:`, error);
+			return false;
+		}
+	};
+
+	const keys = async (pattern: string): Promise<string[]> => {
+		try {
+			return await redis.keys(pattern);
+		} catch (error) {
+			console.error(`Error getting keys for pattern ${pattern}:`, error);
+			return [];
+		}
+	};
+
 	const close = async (): Promise<void> => {
 		try {
 			await redis.quit();
@@ -116,6 +137,8 @@ export function makeRedisService(redisUrl: string): RedisService {
 		srem,
 		smembers,
 		scard,
+		sismember,
+		keys,
 		close,
 	};
 }
