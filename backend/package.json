@@ -3,9 +3,10 @@
 	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "bun --watch src/index.ts",
-		"start": "bun src/index.ts",
-		"check": "tsc --noEmit"
+		"dev": "bun run migrate && bun --watch src/index.ts",
+		"start": "bun run migrate && bun src/index.ts",
+		"check": "tsc --noEmit",
+		"migrate": "bun run drizzle-kit migrate --config drizzle.config.ts"
 	},
 	"dependencies": {
 		"cors": "^2.8.5",
