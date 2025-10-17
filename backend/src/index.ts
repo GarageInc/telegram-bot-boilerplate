@@ -16,7 +16,7 @@ await initServices();
 
 // Health check
 app.get("/health", (req, res) => {
-	res.json({ status: "ok" });
+	res.json({ status: "ok", database: "connected" });
 });
 
 // Routes

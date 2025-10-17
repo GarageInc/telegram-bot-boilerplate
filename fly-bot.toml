@@ -4,7 +4,7 @@
 #
 
 app = "clicker-bot"
-primary_region = "fra" # Frankfurt (same as your Render setup)
+primary_region = "ams" # Frankfurt (same as your Render setup)
 
 [build]
   dockerfile = "./bot/Dockerfile"
