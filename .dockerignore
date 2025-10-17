@@ -1,0 +1,74 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+FLY_DEPLOYMENT.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies (will be installed in Docker)
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/build/
+**/.next/
+
+# Test files
+**/__tests__/
+**/*.test.ts
+**/*.test.js
+**/*.spec.ts
+**/*.spec.js
+**/coverage/
+
+# Environment files (use secrets instead)
+.env
+.env.*
+!.env.example
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Lock files (we want these)
+!**/bun.lock
+!**/package-lock.json
+!**/yarn.lock
+
+# Config files not needed in production
+.prettierrc
+.eslintrc*
+tsconfig.*.json
+
+# Development files
+docker-compose.yml
+render.yaml
+fly.toml
+

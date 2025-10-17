@@ -32,10 +32,7 @@ services:
           name: clicker-postgres
           property: connectionString
       - key: REDIS_URL
-        fromService:
-          name: clicker-redis
-          type: redis
-          property: connectionString
+        sync: false
     healthCheckPath: /health
 
   # Telegram Bot (runs as web service with webhooks)
@@ -57,15 +54,9 @@ services:
           name: clicker-postgres
           property: connectionString
       - key: REDIS_URL
-        fromService:
-          name: clicker-redis
-          type: redis
-          property: connectionString
+        sync: false
       - key: QUEUE_REDIS_URL
-        fromService:
-          name: clicker-redis
-          type: redis
-          property: connectionString
+        sync: false
       - key: PORT
         value: 3000
       - key: REFERRAL_CRYPTO_KEY
