@@ -1,0 +1,7 @@
+[install]
+frozen = true
+
+[module]
+[module.resolution]
+"@common/*" = "./common/*"
+

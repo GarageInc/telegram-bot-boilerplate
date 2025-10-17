@@ -5,8 +5,9 @@ WORKDIR /app
 # Copy common folder
 COPY common/ ./common/
 
-# Copy backend package.json
+# Copy backend files
 COPY backend/package.json ./package.json
+COPY backend/bunfig.toml ./bunfig.toml
 
 # Install dependencies
 RUN bun install --frozen-lockfile

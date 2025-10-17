@@ -9,6 +9,7 @@ COPY common/ ./common/
 # Copy bot package files
 COPY bot/package.json ./package.json
 COPY bot/bun.lock ./bun.lock
+COPY bot/bunfig.toml ./bunfig.toml
 
 # Install dependencies
 RUN bun install --frozen-lockfile
@@ -27,6 +28,7 @@ COPY common/ ./common/
 # Copy bot package files
 COPY bot/package.json ./package.json
 COPY bot/bun.lock ./bun.lock
+COPY bot/bunfig.toml ./bunfig.toml
 
 # Install production dependencies
 RUN bun install --frozen-lockfile --production

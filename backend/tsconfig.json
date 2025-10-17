@@ -17,6 +17,6 @@
 			"@common/*": ["../common/*"]
 		}
 	},
-	"include": ["src/**/*", "../common/**/*"],
+	"include": ["src/**/*"],
 	"exclude": ["node_modules"]
 }
