@@ -1,18 +1,20 @@
 # Use the official Bun image as base
 FROM oven/bun:1.2.19 AS base
 
-# Set working directory
 WORKDIR /app
 
 # Copy common folder
 COPY common/ ./common/
 
-# Copy bot files
-COPY bot/package.json bot/bun.lock ./
+# Copy bot package files
+COPY bot/package.json ./package.json
+COPY bot/bun.lock ./bun.lock
+
+# Install dependencies
 RUN bun install --frozen-lockfile
 
-COPY bot/ ./
-
+# Copy bot source
+COPY bot/src/ ./src/
 
 # Production image
 FROM oven/bun:1.2.19-slim AS production
@@ -23,7 +25,10 @@ WORKDIR /app
 COPY common/ ./common/
 
 # Copy bot package files
-COPY bot/package.json bot/bun.lock ./
+COPY bot/package.json ./package.json
+COPY bot/bun.lock ./bun.lock
+
+# Install production dependencies
 RUN bun install --frozen-lockfile --production
 
 # Copy source from build stage
