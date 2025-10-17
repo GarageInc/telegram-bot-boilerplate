@@ -6,6 +6,6 @@ export default defineConfig({
 	out: "./src/infra/database/drizzle",
 	schema: "./src/infra/database/drizzle/schema.ts",
 	dialect: "postgresql",
-	dbCredentials: { ...PG, ssl: false },
+	dbCredentials: PG,
 	strict: true,
 });

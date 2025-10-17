@@ -22,7 +22,6 @@ export const SHUTDOWN_TIMEOUT_MS = opt("SHUTDOWN_TIMEOUT_MS", ms => (ms != null 
 // Database connection details
 export const DATABASE_URL = opt("DATABASE_URL", url => url && new URL(url));
 
-console.log("DATABASE_URL", DATABASE_URL);
 export const PG = DATABASE_URL
 	? {
 			host: DATABASE_URL.hostname,
@@ -30,6 +29,7 @@ export const PG = DATABASE_URL
 			user: DATABASE_URL.username,
 			password: DATABASE_URL.password,
 			database: DATABASE_URL.pathname.slice(1),
+			ssl: true,
 		}
 	: {
 			host: reqd("PG_HOST"),
@@ -37,7 +37,9 @@ export const PG = DATABASE_URL
 			user: reqd("PG_USER"),
 			password: reqd("PG_PASSWORD"),
 			database: reqd("PG_DATABASE"),
+			ssl: true,
 		};
+
 
 console.log("PG", PG);
 
