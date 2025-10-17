@@ -29,7 +29,7 @@ export const PG = DATABASE_URL
 			user: DATABASE_URL.username,
 			password: DATABASE_URL.password,
 			database: DATABASE_URL.pathname.slice(1),
-			ssl: true,
+			ssl: { rejectUnauthorized: false },
 		}
 	: {
 			host: reqd("PG_HOST"),
@@ -37,7 +37,7 @@ export const PG = DATABASE_URL
 			user: reqd("PG_USER"),
 			password: reqd("PG_PASSWORD"),
 			database: reqd("PG_DATABASE"),
-			ssl: true,
+			ssl: { rejectUnauthorized: false },
 		};
 
 
