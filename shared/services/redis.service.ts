@@ -1,5 +1,4 @@
 import IORedis from "ioredis";
-import { REDIS_URL } from "../env.ts";
 
 export interface RedisService {
 	getString(key: string): Promise<string | null>;
@@ -57,8 +56,8 @@ export interface RedisService {
 	hgetall(key: string): Promise<Record<string, string>>;
 }
 
-export function makeRedisService(): RedisService {
-	const redis = new IORedis(REDIS_URL);
+export function makeRedisService(redisUrl: string): RedisService {
+	const redis = new IORedis(redisUrl);
 
 	// Handle connection events
 	redis.on("connect", () => {
@@ -274,3 +273,5 @@ export function makeRedisService(): RedisService {
 		close,
 	};
 }
+
+

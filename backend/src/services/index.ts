@@ -1,6 +1,6 @@
-import { makeClickerService } from "./clicker.service.ts";
-import { makeLeaderboardService } from "./leaderboard.service.ts";
-import { makeRedisService } from "./redis.service.ts";
+import { makeClickerService } from "../../../shared/services/clicker.service";
+import { makeLeaderboardService } from "../../../shared/services/leaderboard.service";
+import { makeRedisService } from "../../../shared/services/redis.service";
 import { db } from "../database/client.ts";
 import { makeUserRepository } from "./user.repository.ts";
 

@@ -1,7 +1,11 @@
-import type { RedisService } from "./redis.service.ts";
-import type { UserRepository } from "../repositories/user.repository.ts";
+import type { RedisService } from "./redis.service";
 
 export class LeaderboardServiceError extends Error {}
+
+export interface UserRepository {
+	getTopClickerUsers(limit: number): Promise<any[]>;
+	getUserRank(userId: string): Promise<number | null>;
+}
 
 interface Dependencies {
 	redisService: RedisService;
@@ -62,3 +66,5 @@ export function makeLeaderboardService({ redisService, userRepository }: Depende
 }
 
 export type LeaderboardService = ReturnType<typeof makeLeaderboardService>;
+
+

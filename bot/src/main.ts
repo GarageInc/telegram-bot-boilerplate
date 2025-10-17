@@ -13,6 +13,7 @@ import {
 	BOT_API_ROOT,
 	TELEGRAM_API_ID,
 	TELEGRAM_API_HASH,
+	REDIS_URL,
 } from "./env.ts";
 
 import { hash } from "node:crypto";
@@ -213,7 +214,7 @@ const deps: BotDependencies = (() => {
 	// initialisation of dependencies goes here
 	const userRepository = makeUserRepository(db) ;
 
-	const redisService = makeRedisService();
+	const redisService = makeRedisService(REDIS_URL);
 
 	const clickerService = makeClickerService({ redisService, userRepository });
 	const leaderboardService = makeLeaderboardService({ redisService, userRepository });

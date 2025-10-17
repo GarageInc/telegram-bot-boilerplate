@@ -1,7 +1,14 @@
-import type { UserRepository } from "../repositories/user.repository.ts";
-import type { RedisService } from "./redis.service.ts";
+import type { RedisService } from "./redis.service";
 
 export class ClickerServiceError extends Error {}
+
+export interface UserRepository {
+	findById(id: string): Promise<any>;
+	findAll(): Promise<any[]>;
+	updateUser(id: string, updates: any): Promise<any>;
+	getTopClickerUsers(limit: number): Promise<any[]>;
+	getUserRank(userId: string): Promise<number | null>;
+}
 
 interface Dependencies {
 	redisService: RedisService;
@@ -16,7 +23,7 @@ const SYNC_INTERVAL_MS = 5000; // 5 seconds
 const ACTIVE_USER_TTL = 30; // 30 seconds - users are considered active if they clicked in last 30s
 
 export function makeClickerService({ redisService, userRepository }: Dependencies) {
-	let syncIntervalId: Timer | null = null;
+	let syncIntervalId: ReturnType<typeof setTimeout> | null = null;
 
 	const incrementClicks = async (userId: string, amount: number = 1): Promise<number> => {
 		const userKey = `${USER_CLICKS_PREFIX}${userId}`;
@@ -194,3 +201,5 @@ export function makeClickerService({ redisService, userRepository }: Dependencie
 }
 
 export type ClickerService = ReturnType<typeof makeClickerService>;
+
+

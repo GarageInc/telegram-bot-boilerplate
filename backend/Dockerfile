@@ -2,16 +2,19 @@ FROM oven/bun:1.2.19
 
 WORKDIR /app
 
-
 # Copy backend files
-COPY backend/package.json ./package.json
-COPY backend/bunfig.toml ./bunfig.toml
+COPY backend/package.json ./backend/package.json
+COPY backend/bunfig.toml ./backend/bunfig.toml
 
 # Install dependencies
+WORKDIR /app/backend
 RUN bun install --frozen-lockfile
 
+# Copy shared services
+COPY shared/ /app/shared/
+
 # Copy backend source
-COPY backend/src/ ./src/
+COPY backend/src/ /app/backend/src/
 
 # Expose port
 EXPOSE 4000
