@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import type { TelegramWebApp } from "../types/telegram";
 
-const API_URL = "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export function useClicker(tg: TelegramWebApp) {
 	const [clickCount, setClickCount] = useState(0);
@@ -10,8 +10,8 @@ export function useClicker(tg: TelegramWebApp) {
 	const [comboCount, setComboCount] = useState(0);
 	const [rateLimited, setRateLimited] = useState(false);
 
-	const syncTimer = useRef<NodeJS.Timeout | null>(null);
-	const comboTimer = useRef<NodeJS.Timeout | null>(null);
+	const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const comboTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const userId = tg.initDataUnsafe?.user?.id;
 

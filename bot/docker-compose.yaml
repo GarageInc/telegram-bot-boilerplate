@@ -1,0 +1,59 @@
+services:
+  # PostgreSQL service
+  postgres:
+    image: postgres:14-alpine
+    hostname: db.local
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: admin
+      POSTGRES_DB: databasev1
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d databasev1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis service
+  redis:
+    image: redis:7-alpine
+    hostname: redis.local
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      BACKEND_PORT: 4000
+      BOT_TOKEN: ${BOT_TOKEN}
+      DATABASE_URL: postgresql://admin:password@db.local:5432/databasev1
+      REDIS_URL: redis://redis.local:6379
+    depends_on:
+      - postgres
+      - redis
+
+  # anvil local blockchains
+  anvil:
+    build:
+      context: .
+      dockerfile: Dockerfile-foundry
+    hostname: anvil.local
+    env_file:
+      - .env
+    ports:
+      - "9601-9609:9601-9609"
+
+volumes:
+  pgdata:
+  redisdata:

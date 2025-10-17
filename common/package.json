@@ -1,0 +1,24 @@
+{
+  "name": "clicker-common",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    "./database/schema": "./database/schema.ts",
+    "./repositories/user.repository": "./repositories/user.repository.ts",
+    "./services/redis.service": "./services/redis.service.ts",
+    "./services/clicker.service": "./services/clicker.service.ts",
+    "./services/leaderboard.service": "./services/leaderboard.service.ts"
+  },
+  "module": "index.ts",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.6",
+    "ioredis": "^5.8.1"
+  }
+}

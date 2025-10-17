@@ -1,0 +1,124 @@
+import type { RedisService } from "./redis.service.ts";
+import type { UserRepository } from "../repositories/user.repository.ts";
+
+export class ClickerServiceError extends Error {}
+
+interface Dependencies {
+	redisService: RedisService;
+	userRepository: UserRepository;
+}
+
+const GLOBAL_CLICKS_KEY = "clicker:global:total";
+const USER_CLICKS_PREFIX = "clicker:user:";
+const SYNC_BATCH_SIZE = 100;
+
+export function makeClickerService({ redisService, userRepository }: Dependencies) {
+	const incrementClicks = async (userId: string, amount: number = 1): Promise<number> => {
+		const userKey = `${USER_CLICKS_PREFIX}${userId}`;
+
+		const newUserTotal = await redisService.incrBy(userKey, amount);
+		await redisService.incrBy(GLOBAL_CLICKS_KEY, amount);
+
+		await redisService.sadd("clicker:pending_sync", userId);
+
+		const pendingCount = await redisService.scard("clicker:pending_sync");
+		if (pendingCount >= SYNC_BATCH_SIZE) {
+			syncPendingClicksToDatabase().catch(err => console.error("Background sync failed:", err));
+		}
+
+		return newUserTotal;
+	};
+
+	const getUserClicks = async (userId: string): Promise<number> => {
+		const userKey = `${USER_CLICKS_PREFIX}${userId}`;
+
+		const clicks = await redisService.getString(userKey);
+		if (clicks !== null) {
+			return parseInt(clicks, 10);
+		}
+
+		const user = await userRepository.findById(userId);
+		const count = user?.clickCount ?? 0;
+
+		await redisService.setString(userKey, count.toString());
+
+		return count;
+	};
+
+	const getGlobalClicks = async (): Promise<number> => {
+		const total = await redisService.getString(GLOBAL_CLICKS_KEY);
+
+		if (total !== null) {
+			return parseInt(total, 10);
+		}
+
+		const count = await initializeGlobalCount();
+		return count;
+	};
+
+	const initializeGlobalCount = async (): Promise<number> => {
+		const users = await userRepository.findAll();
+
+		const total = users.reduce((sum, user) => sum + (user.clickCount ?? 0), 0);
+		await redisService.setString(GLOBAL_CLICKS_KEY, total.toString());
+
+		return total;
+	};
+
+	const syncPendingClicksToDatabase = async (): Promise<number> => {
+		const userIds = await redisService.smembers("clicker:pending_sync");
+		if (userIds.length === 0) return 0;
+
+		let syncedCount = 0;
+		for (const userId of userIds) {
+			try {
+				const userKey = `${USER_CLICKS_PREFIX}${userId}`;
+				const clicks = await redisService.getString(userKey);
+
+				if (clicks !== null) {
+					await userRepository.updateUser(userId, {
+						clickCount: parseInt(clicks, 10),
+					});
+					syncedCount++;
+				}
+
+				await redisService.srem("clicker:pending_sync", userId);
+			} catch (error) {
+				console.error(`Failed to sync clicks for user ${userId}:`, error);
+			}
+		}
+
+		return syncedCount;
+	};
+
+	const warmCache = async (): Promise<void> => {
+		const users = await userRepository.findAll();
+
+		let globalTotal = 0;
+
+		for (const user of users) {
+			const count = user.clickCount ?? 0;
+			globalTotal += count;
+
+			if (count > 0) {
+				const userKey = `${USER_CLICKS_PREFIX}${user.id}`;
+				await redisService.setString(userKey, count.toString());
+			}
+		}
+
+		await redisService.setString(GLOBAL_CLICKS_KEY, globalTotal.toString());
+
+		console.log(`Clicker cache warmed: ${users.length} users, ${globalTotal} total clicks`);
+	};
+
+	return {
+		incrementClicks,
+		getUserClicks,
+		getGlobalClicks,
+		syncPendingClicksToDatabase,
+		warmCache,
+		initializeGlobalCount,
+	};
+}
+
+export type ClickerService = ReturnType<typeof makeClickerService>;
