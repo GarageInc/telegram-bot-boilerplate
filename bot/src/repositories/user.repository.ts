@@ -1,7 +1,6 @@
 import type { Database } from "../infra/database/index.ts";
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { makeUserRepository as makeCommonUserRepository } from "../../../common/repositories/user.repository.ts";
 import { users } from "../infra/database/drizzle/schema.ts";
 
 export const makeUserRepository = (db: NodePgDatabase) => {

@@ -49,6 +49,7 @@ import { otherCommands, startCommand } from "./command/index.ts";
 import { error } from "./messages/index.ts";
 import type { BotCommandSetup } from "./command/types.ts";
 import { formatError, getErrorMessage } from "./utils/index.ts";
+import type { UserRepository } from "@common/repositories/user.repository.ts";
 //#endregion
 
 if (EXTRA_TRACING.size > 0) {
@@ -211,12 +212,12 @@ const db = await makeClient();
 const sessionStorage = await makeRedisStorage();
 const deps: BotDependencies = (() => {
 	// initialisation of dependencies goes here
-	const userRepository = makeUserRepository(db);
+	const userRepository = makeUserRepository(db) ;
 
 	const redisService = makeRedisService();
 
-	const clickerService = makeClickerService({ redisService, userRepository });
-	const leaderboardService = makeLeaderboardService({ redisService, userRepository });
+	const clickerService = makeClickerService({ redisService, userRepository: userRepository as unknown as UserRepository });
+	const leaderboardService = makeLeaderboardService({ redisService, userRepository: userRepository as unknown as UserRepository });
 
 	const deps: BotDependencies = {
 		sessionStorage,
@@ -244,7 +245,7 @@ const broadcasterService = makeBroadcasterService({
 deps.broadcasterService = broadcasterService;
 
 // Warm up the clicker cache on startup
-deps.clickerService.warmCache().catch(err => console.error("Failed to warm clicker cache:", err));
+deps.clickerService.warmCache().catch((err: Error) => console.error("Failed to warm clicker cache:", err));
 
 const sender: { client: TelegramClient | undefined } = { client: undefined };
 
