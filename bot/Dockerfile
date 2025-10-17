@@ -1,41 +1,38 @@
 # Use the official Bun image as base
-FROM oven/bun:1.2.19 as base
+FROM oven/bun:1.2.19 AS base
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lock ./
+# Copy common folder
+COPY common/ ./common/
 
-# Install dependencies
+# Copy bot files
+COPY bot/package.json bot/bun.lock ./
 RUN bun install --frozen-lockfile
 
-# Copy source code
-COPY . .
+COPY bot/ ./
 
-# Type check
-RUN bun run check
 
 # Production image
-FROM oven/bun:1.2.19-slim as production
+FROM oven/bun:1.2.19-slim AS production
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lock ./
-COPY --from=base /app/../common ../common
+# Copy common folder
+COPY common/ ./common/
 
-# Install production dependencies
+# Copy bot package files
+COPY bot/package.json bot/bun.lock ./
 RUN bun install --frozen-lockfile --production
 
 # Copy source from build stage
 COPY --from=base /app/src ./src
 
-# Expose port for health checks
+# Expose port
 EXPOSE 3000
 
-# Set environment variables
+# Environment
 ENV NODE_ENV=production
 ENV BUN_ENV=production
 
