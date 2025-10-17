@@ -1,5 +1,5 @@
 import type { BotDependencies } from "../dependencies.ts";
-import type { Database } from "../infra/database/index.ts";
+import type { Database } from "../../../shared/infra/database/drizzle/types.ts";
 import type { BotCommandSetup } from "./types.ts";
 import { decrypt } from "../utils/referral.ts";
 import { type BotContext, coerceFrom } from "../context.ts";

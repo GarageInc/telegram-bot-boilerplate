@@ -1,7 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { DATABASE_URL } from "../../env.ts";
 import { Pool } from "pg";
-import { traceFunction } from "../../plugins/opentelemetry.ts";
 
 export async function makeClient() {
 	console.log("🔌 Connecting to database...");
@@ -11,17 +10,17 @@ export async function makeClient() {
 	});
 
 	// Test the connection
-	pool.on("error", err => console.error("❌ Database connection error:", err));
+	pool.on("error", (err: any) => console.error("❌ Database connection error:", err));
 
 	const db = drizzle(pool);
 
 	// Test the connection with a simple query
 	await pool
 		.query("SELECT NOW()")
-		.then(result => console.log("✅ Database test query successful:", JSON.stringify(result.rows[0])))
-		.catch(err => Promise.reject(new Error("❌ Database test query failed!", { cause: err })));
+		.then((result: any) => console.log("✅ Database test query successful:", JSON.stringify(result.rows[0])))
+		.catch((err: any) => Promise.reject(new Error("❌ Database test query failed!", { cause: err })));
 
-	pool.query = traceFunction("db.query", pool.query.bind(pool));
+	// pool.query = traceFunction("db.query", pool.query.bind(pool));
 
 	return db;
 }

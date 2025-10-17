@@ -1,3 +1,3 @@
 export * from "./client.ts";
-export * from "../../../../shared/database/schema";
+export * from "../../database/schema.ts";
 export * from "./drizzle/types.ts";

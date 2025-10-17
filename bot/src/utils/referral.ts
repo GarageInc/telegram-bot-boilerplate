@@ -1,5 +1,5 @@
 import * as crypto from "node:crypto";
-import { REFERRAL_CRYPTO_KEY, REFERRAL_CRYPTO_IV } from "../env.ts";
+import { REFERRAL_CRYPTO_KEY, REFERRAL_CRYPTO_IV } from "../../../shared/env.ts";
 
 export function encrypt(phrase: string): string {
 	const algorithm = "aes-256-cbc";

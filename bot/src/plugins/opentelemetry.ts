@@ -2,7 +2,7 @@ import type { Context, Middleware, RawApi, Transformer } from "grammy";
 
 import * as otel from "@opentelemetry/api";
 import { isError, stringifySafe } from "../utils/index.ts";
-import { OTLP_ENDPOINT } from "../env.ts";
+import { OTLP_ENDPOINT } from "../../../shared/env.ts";
 
 import { w } from "w";
 

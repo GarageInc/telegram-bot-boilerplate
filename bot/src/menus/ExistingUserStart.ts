@@ -4,7 +4,7 @@ import { type BotContext, coerceFrom } from "../context.ts";
 import type { BotDependencies } from "../dependencies.ts";
 import { clicker } from "../messages/index.ts";
 import { w } from "w";
-import { MINI_APP_URL } from "../env.ts";
+import { MINI_APP_URL } from "../../../shared/env.ts";
 
 const log = w("bot:start-menu");
 const err = w("bot:start-menu:error");

@@ -1,4 +1,4 @@
-import { opt, reqd, checks } from "./utils/env_vars.ts";
+import { opt, reqd, checks } from "./env_vars.ts";
 
 export const BOT_TOKEN = reqd("BOT_TOKEN");
 export const BOT_API_ROOT = opt("BOT_API_ROOT");

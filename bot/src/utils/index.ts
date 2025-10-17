@@ -4,7 +4,6 @@ import { format } from "node:util";
 
 import { MenuRange } from "@grammyjs/menu";
 import type { Context } from "grammy";
-import type { Database } from "../infra/database/index.ts";
 /** T[K] but non-nullable. Useful when having to traverse a deeply nullable object. */
 export type Unwrap<T, K extends keyof T> = T[K] & {};
 

@@ -2,7 +2,7 @@ const RATE_LIMIT = 20; // 20 messages per second to be safe
 const RETRY_DELAY = 5000; // 5 seconds delay between retries
 
 import Queue from "bull";
-import { BOT_TOKEN, QUEUE_REDIS_URL } from "../env.ts";
+import { BOT_TOKEN, QUEUE_REDIS_URL } from "../../../shared/env.ts";
 
 interface SendMessageJob {
 	userId: string;

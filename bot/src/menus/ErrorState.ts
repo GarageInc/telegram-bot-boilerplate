@@ -4,7 +4,7 @@ import { createMenu } from "../plugins/StatefulMenu.ts";
 import type { BotContext } from "../context.ts";
 import type { BotDependencies } from "../dependencies.ts";
 import { COMMON_BUTTONS, error } from "../messages/index.ts";
-import { NO_ERROR_TRACE_ID } from "../env.ts";
+import { NO_ERROR_TRACE_ID } from "../../../shared/env.ts";
 
 declare module "../plugins/StatefulMenu.ts" {
 	interface MenuRegistry {

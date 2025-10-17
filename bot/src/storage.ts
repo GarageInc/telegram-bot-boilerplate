@@ -1,6 +1,6 @@
 import IORedis from "ioredis";
 import { RedisAdapter } from "@grammyjs/storage-redis";
-import { REDIS_URL } from "./env.ts";
+import { REDIS_URL } from "../../shared/env.ts";
 import type { SessionData } from "./context.ts";
 import type { StorageAdapter } from "grammy";
 

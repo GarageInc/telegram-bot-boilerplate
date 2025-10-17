@@ -1,4 +1,4 @@
-import type { users } from "../infra/database";
+import type { users } from "../../../shared/database/schema";
 import { type UserRepository } from "../repositories/user.repository";
 
 export class UserServiceError extends Error {}

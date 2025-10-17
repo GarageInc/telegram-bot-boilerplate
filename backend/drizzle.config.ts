@@ -7,8 +7,8 @@ if (!DATABASE_URL) {
 }
 
 export default defineConfig({
-	out: "./src/infra/database/drizzle",
-	schema: "../shared/database/schema.ts",
+	out: "./../shared/infra/database/drizzle",
+	schema: "./../shared/database/schema.ts",
 	dialect: "postgresql",
 	dbCredentials: {
 		url: DATABASE_URL?.toString() ?? "",

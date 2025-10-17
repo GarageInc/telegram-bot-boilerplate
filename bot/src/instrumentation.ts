@@ -1,5 +1,5 @@
 // ⚠️: Keep this at the top for early error detection
-import { OTEL_SERVICE_NAME, OTLP_ENDPOINT, OTEL_AUTH_TOKEN } from "./env.ts";
+import { OTEL_SERVICE_NAME, OTLP_ENDPOINT, OTEL_AUTH_TOKEN } from "../../shared/env.ts";
 
 import * as otel from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";

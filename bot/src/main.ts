@@ -14,7 +14,8 @@ import {
 	TELEGRAM_API_ID,
 	TELEGRAM_API_HASH,
 	REDIS_URL,
-} from "./env.ts";
+} from "../../shared/env.ts";
+import { makeClient } from "../../shared/infra/database/client.ts";
 
 import { hash } from "node:crypto";
 import { Bot, BotError, Context, session, webhookCallback } from "grammy";
@@ -30,7 +31,6 @@ import { installSendOrEditMethod } from "./plugins/sendOrEditMethod.ts";
 import { menus } from "./plugins/StatefulMenu.ts";
 import { makeRedisStorage } from "./storage.ts";
 import type { BotDependencies } from "./dependencies.ts";
-import { makeClient } from "./infra/database/index.ts";
 import { ignoreErrors } from "./plugins/ignoreErrors.ts";
 //#endregion
 
