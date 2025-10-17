@@ -3,14 +3,14 @@ databases:
     databaseName: clicker_db
     user: clicker_user
     plan: free
-    region: oregon
+    region: frankfurt
 
 services:
   # Redis Instance
   - type: redis
     name: clicker-redis
     plan: free
-    region: oregon
+    region: frankfurt
     maxmemoryPolicy: allkeys-lru
     ipAllowList: []
 
@@ -21,7 +21,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
     plan: free
-    region: oregon
+    region: frankfurt
     envVars:
       - key: BACKEND_PORT
         value: 4000
@@ -45,7 +45,7 @@ services:
     dockerfilePath: ./bot/Dockerfile
     dockerContext: .
     plan: free
-    region: oregon
+    region: frankfurt
     healthCheckPath: /health
     envVars:
       - key: BOT_TOKEN
