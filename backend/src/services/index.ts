@@ -10,7 +10,7 @@ let clickerService: ReturnType<typeof makeClickerService>;
 let leaderboardService: ReturnType<typeof makeLeaderboardService>;
 
 export async function initServices() {
-	const userRepository = makeUserRepository(db);
+	const userRepository = makeUserRepository(db as any);
 	const redisService = makeRedisService(REDIS_URL);
 
 	clickerService = makeClickerService({ redisService, userRepository });

@@ -4,7 +4,7 @@ import { PG } from "./src/env";
 
 export default defineConfig({
 	out: "./src/infra/database/drizzle",
-	schema: "./src/infra/database/drizzle/schema.ts",
+	schema: "../shared/database/schema.ts",
 	dialect: "postgresql",
 	dbCredentials: PG,
 	strict: true,

@@ -212,7 +212,7 @@ const db = await makeClient();
 const sessionStorage = await makeRedisStorage();
 const deps: BotDependencies = (() => {
 	// initialisation of dependencies goes here
-	const userRepository = makeUserRepository(db) ;
+	const userRepository = makeUserRepository(db as any);
 
 	const redisService = makeRedisService(REDIS_URL);
 

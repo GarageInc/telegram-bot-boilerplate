@@ -37,3 +37,4 @@ export const users = pgTable("users", {
 	unique("users_ref_code_key").on(table.refCode),
 	unique("users_display_name_key").on(table.displayName),
 ]);
+

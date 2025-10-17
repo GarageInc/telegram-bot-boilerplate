@@ -9,6 +9,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "ioredis": "^5.8.1"
+    "ioredis": "^5.8.1",
+    "drizzle-orm": "^0.44.6"
   }
 }
