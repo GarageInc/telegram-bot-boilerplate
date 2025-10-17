@@ -15,6 +15,7 @@ const pool = new pg.Pool({
 	user: url.username,
 	password: url.password,
 	database: url.pathname.slice(1),
+	ssl: { rejectUnauthorized: false },
 });
 
 export const db = drizzle(pool);
