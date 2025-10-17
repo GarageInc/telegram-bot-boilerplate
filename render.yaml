@@ -78,8 +78,9 @@ services:
   - type: web
     name: clicker-webapp
     runtime: static
-    buildCommand: cd web && bun install && bun run build
-    staticPublishPath: ./web/dist
+    buildCommand: bun install && bun run build
+    staticPublishPath: ./dist
+    rootDir: ./web
     routes:
       - type: rewrite
         source: /*
