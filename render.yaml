@@ -86,8 +86,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          name: clicker-backend
-          type: web
-          property: host
-
+        sync: false
