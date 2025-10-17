@@ -38,8 +38,8 @@ services:
           property: connectionString
     healthCheckPath: /health
 
-  # Telegram Bot (Background Worker)
-  - type: worker
+  # Telegram Bot (runs as web service with long polling)
+  - type: web
     name: clicker-bot
     runtime: docker
     dockerfilePath: ./bot/Dockerfile
@@ -71,6 +71,8 @@ services:
         sync: false
       - key: REFERRAL_CRYPTO_IV
         sync: false
+      - key: NODE_ENV
+        value: production
 
   # React Web App (Static Site)
   - type: web
