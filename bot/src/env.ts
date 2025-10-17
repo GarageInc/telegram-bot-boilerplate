@@ -20,29 +20,9 @@ export const NO_ERROR_TRACE_ID = opt("NO_ERROR_TRACE_ID", value => value === "tr
 export const SHUTDOWN_TIMEOUT_MS = opt("SHUTDOWN_TIMEOUT_MS", ms => (ms != null && parseInt(ms, 10)) || 5_000);
 
 // Database connection details
-export const DATABASE_URL = opt("DATABASE_URL", url => url && new URL(url));
+export const DATABASE_URL = reqd("DATABASE_URL");
 
-console.log("DATABASE_URL", DATABASE_URL);
-
-export const PG = DATABASE_URL
-	? {
-			host: DATABASE_URL.hostname,
-			port: parseInt(DATABASE_URL.port, 10) || 5432,
-			user: DATABASE_URL.username,
-			password: DATABASE_URL.password,
-			database: DATABASE_URL.pathname.slice(1),
-			ssl: { rejectUnauthorized: false },
-		}
-	: {
-			host: reqd("PG_HOST"),
-			port: parseInt(reqd("PG_PORT"), 10),
-			user: reqd("PG_USER"),
-			password: reqd("PG_PASSWORD"),
-			database: reqd("PG_DATABASE"),
-			ssl: { rejectUnauthorized: false },
-		};
-
-console.log("PG", PG);
+console.log("DATABASE_URL ===> ", DATABASE_URL);
 
 // Webhook configuration
 export const ENABLE_WEBHOOKS = opt("ENABLE_WEBHOOKS") === "true";

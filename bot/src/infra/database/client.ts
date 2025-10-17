@@ -1,17 +1,14 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { PG } from "../../env.ts";
+import { DATABASE_URL } from "../../env.ts";
 import { Pool } from "pg";
 import { traceFunction } from "../../plugins/opentelemetry.ts";
 
 export async function makeClient() {
 	console.log("🔌 Connecting to database...");
-	console.log(`   Host: ${PG.host}`);
-	console.log(`   Port: ${PG.port}`);
-	console.log(`   Database: ${PG.database}`);
-	console.log(`   User: ${PG.user}`);
-	console.log(`   Password: ${PG.password ? "***" : "NOT SET"}`);
 
-	const pool = new Pool(PG);
+	const pool = new Pool({
+		connectionString: DATABASE_URL?.toString() ?? "",
+	});
 
 	// Test the connection
 	pool.on("error", err => console.error("❌ Database connection error:", err));
