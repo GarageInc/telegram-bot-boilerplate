@@ -11,7 +11,7 @@ COPY bot/drizzle.config.ts ./bot/drizzle.config.ts
 
 # Install dependencies
 WORKDIR /app/bot
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy shared services
 COPY shared/ /app/shared/
@@ -32,7 +32,7 @@ COPY bot/drizzle.config.ts ./bot/drizzle.config.ts
 
 # Install production dependencies
 WORKDIR /app/bot
-RUN bun install --frozen-lockfile --production
+RUN bun install
 
 # Copy shared services
 COPY shared/ /app/shared/
