@@ -33,6 +33,8 @@ export function usePosts(tg: TelegramWebApp) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	const userId = tg.initDataUnsafe?.user?.id;
+
 	const loadPosts = useCallback(async () => {
 		setIsLoading(true);
 		setError(null);
@@ -80,6 +82,10 @@ export function usePosts(tg: TelegramWebApp) {
 
 	const createComment = useCallback(
 		async (postId: string, content: string, parentId: string | null = null) => {
+			if (!userId) {
+				throw new Error("User not authenticated");
+			}
+
 			setError(null);
 			try {
 				const response = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
@@ -88,6 +94,7 @@ export function usePosts(tg: TelegramWebApp) {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
+						userId,
 						content,
 						parentId,
 						initData: tg.initData,
@@ -106,7 +113,7 @@ export function usePosts(tg: TelegramWebApp) {
 				throw err;
 			}
 		},
-		[tg.initData, loadComments]
+		[userId, tg.initData, loadComments]
 	);
 
 	useEffect(() => {

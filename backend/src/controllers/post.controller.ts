@@ -1,20 +1,13 @@
 import type { Request, Response } from "express";
 import type { PostService } from "../../../shared/services/post.service";
-import { verifyTelegramWebAppData } from "../middleware/validateTelegram";
 
 export const makePostController = (postService: PostService) => ({
 	async createPost(req: Request, res: Response) {
 		try {
-			const { content, initData } = req.body;
+			const { content, userId } = req.body;
 
-			// Validate Telegram data
-			const telegramData = verifyTelegramWebAppData(initData);
-			if (!telegramData?.user?.id) {
-				return res.status(401).json({ error: "Unauthorized" });
-			}
-
-			const authorId = String(telegramData.user.id);
-			const post = await postService.createPost(authorId, content);
+			// userId is already validated by validateTelegramData middleware
+			const post = await postService.createPost(String(userId), content);
 
 			res.json(post);
 		} catch (error: any) {
@@ -55,16 +48,10 @@ export const makePostController = (postService: PostService) => ({
 	async createComment(req: Request, res: Response) {
 		try {
 			const { postId } = req.params;
-			const { content, parentId, initData } = req.body;
+			const { content, parentId, userId } = req.body;
 
-			// Validate Telegram data
-			const telegramData = verifyTelegramWebAppData(initData);
-			if (!telegramData?.user?.id) {
-				return res.status(401).json({ error: "Unauthorized" });
-			}
-
-			const authorId = String(telegramData.user.id);
-			const comment = await postService.createComment(postId, authorId, content, parentId || null);
+			// userId is already validated by validateTelegramData middleware
+			const comment = await postService.createComment(postId, String(userId), content, parentId || null);
 
 			res.json(comment);
 		} catch (error: any) {
