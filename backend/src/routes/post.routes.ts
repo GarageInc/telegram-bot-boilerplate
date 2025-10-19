@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { makePostController } from "../controllers/post.controller";
-import { postService } from "../services/index";
+import { makePostService } from "../../../shared/services/post.service";
+import { makePostRepository } from "../../../shared/repositories/post.repository";
 
 export const postRouter = Router();
 
-const postController = makePostController(postService);
+const postController = makePostController(makePostService(makePostRepository()));
 
 // Post routes
 postRouter.post("/", (req, res) => postController.createPost(req, res));

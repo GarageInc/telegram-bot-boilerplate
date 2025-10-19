@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { clickerRouter } from "./routes/clicker.routes.ts";
 
 // Initialize services
 await initServices();
 
+import { clickerRouter } from "./routes/clicker.routes.ts";
 import { postRouter } from "./routes/post.routes.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
 import { initServices } from "./services/index.ts";
