@@ -6,14 +6,15 @@ import { db } from "../database/client.ts";
 import { makeUserRepository } from "./user.repository.ts";
 import { makePostRepository } from "../../../shared/repositories/post.repository";
 import { connectMongoDB } from "../../../shared/infra/database/mongo-client";
-import { REDIS_URL } from "../../../shared/env";
-import { MONGO_URL } from "../../../shared/env";
+import { REDIS_URL, MONGO_URL } from "../../../shared/env";
 
-let clickerService: ReturnType<typeof makeClickerService>;
-let leaderboardService: ReturnType<typeof makeLeaderboardService>;
-let postService: ReturnType<typeof makePostService>;
+export interface Services {
+	clickerService: ReturnType<typeof makeClickerService>;
+	leaderboardService: ReturnType<typeof makeLeaderboardService>;
+	postService: ReturnType<typeof makePostService>;
+}
 
-export async function initServices() {
+export async function createServices(): Promise<Services> {
 	const userRepository = makeUserRepository(db as any);
 	const redisService = makeRedisService(REDIS_URL);
 	
@@ -21,9 +22,9 @@ export async function initServices() {
 	await connectMongoDB(MONGO_URL);
 	const postRepository = makePostRepository();
 
-	clickerService = makeClickerService({ redisService, userRepository });
-	leaderboardService = makeLeaderboardService({ redisService, userRepository });
-	postService = makePostService(postRepository);
+	const clickerService = makeClickerService({ redisService, userRepository });
+	const leaderboardService = makeLeaderboardService({ redisService, userRepository });
+	const postService = makePostService(postRepository);
 
 	// Warm cache
 	await clickerService.warmCache();
@@ -32,6 +33,6 @@ export async function initServices() {
 	clickerService.startPeriodicSync();
 
 	console.log("Services initialized");
-}
 
-export { clickerService, leaderboardService, postService };
+	return { clickerService, leaderboardService, postService };
+}

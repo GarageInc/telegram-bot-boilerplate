@@ -1,18 +1,19 @@
 import { Router } from "express";
 import { makePostController } from "../controllers/post.controller";
-import { makePostService } from "../../../shared/services/post.service";
-import { makePostRepository } from "../../../shared/repositories/post.repository";
+import type { Services } from "../services/index";
 
-export const postRouter = Router();
+export function createPostRouter(services: Services) {
+	const router = Router();
+	const postController = makePostController(services.postService);
 
-const postController = makePostController(makePostService(makePostRepository()));
+	// Post routes
+	router.post("/", (req, res) => postController.createPost(req, res));
+	router.get("/", (req, res) => postController.getPosts(req, res));
+	router.get("/:postId", (req, res) => postController.getPost(req, res));
 
-// Post routes
-postRouter.post("/", (req, res) => postController.createPost(req, res));
-postRouter.get("/", (req, res) => postController.getPosts(req, res));
-postRouter.get("/:postId", (req, res) => postController.getPost(req, res));
+	// Comment routes
+	router.post("/:postId/comments", (req, res) => postController.createComment(req, res));
+	router.get("/:postId/comments", (req, res) => postController.getComments(req, res));
 
-// Comment routes
-postRouter.post("/:postId/comments", (req, res) => postController.createComment(req, res));
-postRouter.get("/:postId/comments", (req, res) => postController.getComments(req, res));
-
+	return router;
+}
