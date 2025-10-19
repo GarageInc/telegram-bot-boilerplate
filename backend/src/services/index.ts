@@ -9,7 +9,6 @@ import { connectMongoDB } from "../../../shared/infra/database/mongo-client";
 import { REDIS_URL } from "../../../shared/env";
 import { MONGO_URL } from "../../../shared/env";
 
-
 let clickerService: ReturnType<typeof makeClickerService>;
 let leaderboardService: ReturnType<typeof makeLeaderboardService>;
 let postService: ReturnType<typeof makePostService>;
