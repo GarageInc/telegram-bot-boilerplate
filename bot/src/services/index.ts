@@ -10,3 +10,5 @@ export { makeClickerService, ClickerServiceError } from "../../../shared/service
 export type { ClickerService } from "../../../shared/services/clicker.service";
 export { makeLeaderboardService, LeaderboardServiceError } from "../../../shared/services/leaderboard.service";
 export type { LeaderboardService, LeaderboardEntry } from "../../../shared/services/leaderboard.service";
+export { makePostService } from "../../../shared/services/post.service";
+export type { PostService } from "../../../shared/services/post.service";

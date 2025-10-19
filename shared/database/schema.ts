@@ -38,3 +38,21 @@ export const users = pgTable("users", {
 	unique("users_display_name_key").on(table.displayName),
 ]);
 
+export const posts = pgTable("posts", {
+	id: varchar({ length: 255 }).primaryKey().notNull(),
+	authorId: varchar("author_id", { length: 255 }).notNull(),
+	content: text().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+
+export const comments = pgTable("comments", {
+	id: varchar({ length: 255 }).primaryKey().notNull(),
+	postId: varchar("post_id", { length: 255 }).notNull(),
+	authorId: varchar("author_id", { length: 255 }).notNull(),
+	parentId: varchar("parent_id", { length: 255 }),
+	content: text().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+});
+

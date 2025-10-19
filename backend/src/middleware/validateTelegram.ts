@@ -53,6 +53,23 @@ function extractUserId(initData: string): string | null {
 	}
 }
 
+export function verifyTelegramWebAppData(initData: string): any {
+	try {
+		if (!validateTelegramWebAppData(initData, BOT_TOKEN)) {
+			return null;
+		}
+
+		const urlParams = new URLSearchParams(initData);
+		const userParam = urlParams.get("user");
+		if (!userParam) return null;
+
+		return JSON.parse(userParam);
+	} catch (error) {
+		console.error("Error verifying Telegram data:", error);
+		return null;
+	}
+}
+
 export function validateTelegramData(req: Request, res: Response, next: NextFunction) {
 	const initData = req.query.initData || req.body.initData;
 

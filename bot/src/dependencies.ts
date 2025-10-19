@@ -14,6 +14,7 @@ import type {
 	ClickerService,
 	LeaderboardService,
 	BroadcasterService,
+	PostService,
 } from "./services/index.ts";
 import type { SessionStorage } from "./storage.ts";
 
@@ -25,6 +26,7 @@ export interface BotDependencies {
 	clickerService: ClickerService;
 	leaderboardService: LeaderboardService;
 	broadcasterService: BroadcasterService;
+	postService: PostService;
 	/**
 	 * ## ⚠️: Do not access directly in a service or module.
 	 * Access or assign to `ctx.session` instead.

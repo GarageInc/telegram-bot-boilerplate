@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { clickerRouter } from "./routes/clicker.routes.ts";
+import { postRouter } from "./routes/post.routes.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
 import { initServices } from "./services/index.ts";
 
@@ -21,6 +22,7 @@ app.get("/health", (req, res) => {
 
 // Routes
 app.use("/api/clicker", clickerRouter);
+app.use("/api/posts", postRouter);
 
 // Error handling
 app.use(errorHandler);

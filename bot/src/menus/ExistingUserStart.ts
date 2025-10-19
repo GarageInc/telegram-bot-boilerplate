@@ -42,6 +42,8 @@ export const ExistingUserStart = ({
 		})
 		.webApp("🎮 Play Game", MINI_APP_URL)
 		.row()
+		.text("💬 Posts & Comments", ctx => ctx.sendMenu("PostsMenu", { state: null }))
+		.row()
 		.text("Change Display Name", ctx => ctx.sendMenu("ChangeDisplayName", { state: null }))
 		.row()
 		.dynamic(async (ctx, range) => {

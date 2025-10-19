@@ -287,3 +287,31 @@ export const admin = {
 		return "❌ Error removing user. Please try again.";
 	},
 };
+
+export const posts = {
+	header() {
+		return [
+			"<b>📋 Posts & Comments</b>",
+			"",
+			"View and create posts with comments.",
+			"Open the Mini App to browse posts and participate in discussions.",
+			"",
+			"<i>Tap \"Create New Post\" to write a new post</i>",
+		].join("\n");
+	},
+	createPostHeader() {
+		return [
+			"<b>📝 Create New Post</b>",
+			"",
+			"Send your post content as a message (up to 4000 characters).",
+			"",
+			"<i>Or tap \"Back\" to return to the posts menu</i>",
+		].join("\n");
+	},
+	postCreated() {
+		return "✅ Post created successfully!";
+	},
+	postError(message: string) {
+		return `❌ Error creating post: ${message}`;
+	},
+};

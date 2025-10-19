@@ -10,3 +10,5 @@ export * from "./EnableReferrals.ts";
 export * from "./BulkWhitelist.ts";
 export * from "./SendMessage.ts";
 export * from "./ChangeDisplayName.ts";
+export * from "./PostsMenu.ts";
+export * from "./CreatePostMenu.ts";

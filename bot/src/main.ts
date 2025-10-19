@@ -14,6 +14,7 @@ import {
 	TELEGRAM_API_ID,
 	TELEGRAM_API_HASH,
 	REDIS_URL,
+	opt,
 } from "../../shared/env.ts";
 import { makeClient } from "../../shared/infra/database/client.ts";
 
@@ -45,6 +46,7 @@ import {
 	makeBroadcasterService,
 	makeClickerService,
 	makeLeaderboardService,
+	makePostService,
 } from "./services/index.ts";
 import { otherCommands, startCommand } from "./command/index.ts";
 import { error } from "./messages/index.ts";
@@ -144,6 +146,8 @@ export function setup(bot: Bot<BotContext>, deps: BotDependencies, sender?: { cl
 			SendMessage: Menus.SendMessage(deps),
 			RemoveUser: Menus.RemoveUser(deps),
 			ChangeDisplayName: Menus.ChangeDisplayName(deps),
+			PostsMenu: Menus.PostsMenu(deps),
+			CreatePostMenu: Menus.CreatePostMenu(deps),
 		}),
 	);
 
@@ -166,36 +170,6 @@ export function setup(bot: Bot<BotContext>, deps: BotDependencies, sender?: { cl
 		await ctx.sendMenu("ExistingUserStart", { state: null });
 	});
 
-	composer.on("message:text", async ctx => {
-		// Handle display name input
-		const text = ctx.message.text.trim();
-
-		// Validate display name
-		const validateDisplayName = (name: string): boolean => {
-			return /^[a-zA-Z0-9\s]{3,20}$/.test(name);
-		};
-
-		if (!validateDisplayName(text)) {
-			await ctx.reply("❌ Invalid display name. Please use 3-20 characters (letters, numbers, spaces allowed).", {
-				parse_mode: "HTML",
-			});
-			return;
-		}
-
-		// Check if display name is already taken
-		const existing = await deps.userService.findUserByDisplayName(text);
-		if (existing && existing.id !== String(ctx.from.id)) {
-			await ctx.reply("❌ This display name is already taken. Please choose another one.", { parse_mode: "HTML" });
-			return;
-		}
-
-		// Update display name
-		await deps.userService.updateUser(String(ctx.from.id), {
-			displayName: text,
-		});
-
-		await ctx.sendMenu("ExistingUserStart", { state: null });
-	});
 
 	composer.on("message", async ctx => {
 		// this is an unexpected message not handled by any menu
@@ -209,6 +183,17 @@ export const bot = new Bot<BotContext>(BOT_TOKEN, { client: { apiRoot: BOT_API_R
 
 const db = await makeClient();
 const sessionStorage = await makeRedisStorage();
+
+// Import MongoDB connection and post repository
+const { connectMongoDB } = await import("../../shared/infra/database/mongo-client.ts");
+const { makePostRepository } = await import("../../shared/repositories/post.repository.ts");
+
+// MongoDB URL for posts/comments
+const MONGO_URL = opt("MONGO_URL") || "mongodb://localhost:27017/komi";
+
+// Connect to MongoDB before initializing services
+await connectMongoDB(MONGO_URL);
+
 const deps: BotDependencies = (() => {
 	// initialisation of dependencies goes here
 	const userRepository = makeUserRepository(db as any);
@@ -217,6 +202,10 @@ const deps: BotDependencies = (() => {
 
 	const clickerService = makeClickerService({ redisService, userRepository });
 	const leaderboardService = makeLeaderboardService({ redisService, userRepository });
+	
+	// Initialize post service with MongoDB
+	const postRepository = makePostRepository();
+	const postService = makePostService(postRepository);
 
 	const deps: BotDependencies = {
 		sessionStorage,
@@ -226,6 +215,7 @@ const deps: BotDependencies = (() => {
 		slackService: makeSlackService(SLACK_WEBHOOK),
 		clickerService,
 		leaderboardService,
+		postService,
 		broadcasterService: null as any, // Will be initialized after bot is created
 	};
 
@@ -377,6 +367,11 @@ async function shutdown(signal: string) {
 
 	console.log("Stopping periodic sync...");
 	deps.clickerService.stopPeriodicSync();
+
+	// Disconnect MongoDB
+	console.log("Stopping MongoDB...");
+	const { disconnectMongoDB } = await import("../../shared/infra/database/mongo-client.ts");
+	promises.push(disconnectMongoDB().catch(noop));
 
 	// Stop HTTP server if running
 	const server = (globalThis as any).__bunServer;

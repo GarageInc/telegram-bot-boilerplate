@@ -1,5 +1,6 @@
 import * as start from "./start.command.ts";
 import * as admin from "./admin.command.ts";
+import * as posts from "./posts.command.ts";
 
 import type { BotCommandSetup } from "./types.ts";
 
@@ -9,6 +10,7 @@ export const startCommand = start.command;
 // simple oneline commands don't need their own file
 export const otherCommands: BotCommandSetup[] = [
 	admin.command,
+	posts.command,
 	{
 		command: "ping",
 		getHandler: () => async ctx => {
