@@ -37,15 +37,13 @@ export const ChangeDisplayName = (deps: Pick<BotDependencies, "userService">) =>
 			};
 
 			if (!validateDisplayName(text)) {
-				await ctx.reply(clicker.invalidDisplayName(), { parse_mode: "HTML" });
-				return ctx.sendMenu("ChangeDisplayName", { state: null });
+				await ctx.sendMenu("ErrorState", { state: { msg: clicker.invalidDisplayName(), noTraceId: true } });
 			}
 
 			// Check if display name is already taken
 			const existing = await deps.userService.findUserByDisplayName(text);
 			if (existing && existing.id !== String(id)) {
-				await ctx.reply(clicker.displayNameTaken(), { parse_mode: "HTML" });
-				return ctx.sendMenu("ChangeDisplayName", { state: null });
+				await ctx.sendMenu("ErrorState", { state: { msg: clicker.displayNameTaken(), noTraceId: true } });
 			}
 
 			try {
@@ -53,7 +51,6 @@ export const ChangeDisplayName = (deps: Pick<BotDependencies, "userService">) =>
 				await deps.userService.updateUser(String(id), { displayName: text });
 				
 				// Show success message and return to main menu
-				await ctx.reply(clicker.displayNameSuccess(text), { parse_mode: "HTML" });
 				return ctx.sendMenu("ExistingUserStart", { state: null });
 			} catch (error: any) {
 				throw new ChangeDisplayNameError(`Failed to update display name for user ${id}: ${error.message}`);

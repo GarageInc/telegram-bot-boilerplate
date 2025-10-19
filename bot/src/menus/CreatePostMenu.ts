@@ -29,12 +29,10 @@ export const CreatePostMenu = (deps: Pick<BotDependencies, "postService">) =>
 				await deps.postService.createPost(String(id), text);
 				
 				// Show success message and return to posts menu
-				await ctx.reply(posts.postCreated(), { parse_mode: "HTML" });
 				return ctx.sendMenu("PostsMenu", { state: null });
 			} catch (error: any) {
 				// Show error message and stay on create post menu
-				await ctx.reply(posts.postError(error.message), { parse_mode: "HTML" });
-				return ctx.sendMenu("CreatePostMenu", { state: null });
+				await ctx.sendMenu("ErrorState", { state: { msg: posts.postError(error.message), noTraceId: true } });
 			}
 		});
 

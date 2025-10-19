@@ -308,9 +308,6 @@ export const posts = {
 			"<i>Or tap \"Back\" to return to the posts menu</i>",
 		].join("\n");
 	},
-	postCreated() {
-		return "✅ Post created successfully!";
-	},
 	postError(message: string) {
 		return `❌ Error creating post: ${message}`;
 	},
