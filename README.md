@@ -14,11 +14,12 @@
 
 ## 🎯 What is This?
 
-A complete, battle-tested template for building **Telegram Mini Apps** with real-time gameplay, live leaderboards, and viral referral mechanics. Built with modern technologies and designed for scale.
+A complete, battle-tested template for building **Telegram Mini Apps** with real-time gameplay, live leaderboards, viral referral mechanics, and a **comment service** for social engagement. Built with modern technologies and designed for scale.
 
 ### Perfect For:
 
 - 🎮 **Game Developers** - Build viral clicker games, idle games, or competitive experiences
+- 💬 **Community Builders** - Create discussion platforms with nested comments
 - 🚀 **Startup Founders** - Launch your MVP in hours, not weeks
 - 💼 **Agencies** - White-label template for client projects
 - 🎓 **Learners** - Study a production-grade Telegram bot architecture
@@ -28,6 +29,7 @@ A complete, battle-tested template for building **Telegram Mini Apps** with real
 ✅ **Production-Ready** - Already deployed and tested at scale  
 ✅ **Real-Time Updates** - Live leaderboards and statistics using Redis pub/sub  
 ✅ **Viral Growth** - Built-in referral system with encrypted codes  
+✅ **Comment Service** - Tree-structured comments with unlimited nesting (MongoDB)  
 ✅ **One-Click Deploy** - Docker and Fly.io configs included  
 ✅ **Type-Safe** - Full TypeScript across frontend, backend, and bot  
 ✅ **Modern Stack** - Built with Bun, React, and the latest tools  
@@ -38,6 +40,7 @@ A complete, battle-tested template for building **Telegram Mini Apps** with real
 
 ### 🤖 Telegram Bot
 - **Interactive Menus** - Beautiful inline keyboard navigation
+- **Posts & Comments** - Create posts directly from the bot
 - **Admin Panel** - User management, broadcasting, and analytics
 - **Webhook Support** - Production-ready webhook handling with Fly.io
 - **Error Handling** - Graceful error recovery with Slack notifications
@@ -45,7 +48,9 @@ A complete, battle-tested template for building **Telegram Mini Apps** with real
 
 ### 🎮 Mini App (Web)
 - **Telegram Web App API** - Seamless integration with Telegram UI
+- **Tab Navigation** - Switch between Clicker game and Posts/Comments
 - **Real-Time Updates** - Live click counts and leaderboard updates
+- **Comment Threads** - Tree-structured discussions with unlimited nesting
 - **Responsive Design** - Works perfectly on mobile and desktop
 - **Rate Limiting** - Client-side and server-side anti-cheat measures
 - **Combo System** - Engaging gameplay mechanics
@@ -63,9 +68,11 @@ A complete, battle-tested template for building **Telegram Mini Apps** with real
 - **Broadcaster Service** - Push updates to all active users
 - **Session Tracking** - Know who's online and where
 
-### 🎁 Growth Features
+### 🎁 Growth & Social Features
 - **Referral System** - Encrypted referral codes with tracking
 - **Display Names** - Let users customize their identity
+- **Posts & Comments** - Discussion system similar to Disqus
+- **Nested Replies** - Unlimited comment threading
 - **Achievements** - Track milestones and engagement
 - **Notifications** - Keep users engaged with updates
 
@@ -80,21 +87,21 @@ A complete, battle-tested template for building **Telegram Mini Apps** with real
          │
     ┌────▼────┐
     │   Bot   │ ◄─── grammY Framework
-    └────┬────┘
-         │
+    └────┬────┘      • /start, /posts commands
+         │           • Create posts
     ┌────▼──────────┐
     │  Mini App     │ ◄─── React + Vite
-    │  (Frontend)   │
-    └────┬──────────┘
+    │  (Frontend)   │      • Clicker game
+    └────┬──────────┘      • Posts & Comments
          │
     ┌────▼──────────┐
     │  Backend API  │ ◄─── Express + Bun
-    └────┬──────────┘
+    └────┬──────────┘      • REST API
          │
-    ┌────▼────┬─────▼────┐
-    │  Redis  │ Postgres │
-    │ (Cache) │  (Data)  │
-    └─────────┴──────────┘
+    ┌────▼────┬─────▼────┬──────▼──────┐
+    │  Redis  │ Postgres │   MongoDB   │
+    │ (Cache) │ (Users)  │(Posts/Cmts) │
+    └─────────┴──────────┴─────────────┘
 ```
 
 ### Tech Stack
@@ -104,7 +111,8 @@ A complete, battle-tested template for building **Telegram Mini Apps** with real
 | **Bot** | grammY, TypeScript | Telegram bot framework |
 | **Frontend** | React, Vite, TypeScript | Mini app interface |
 | **Backend** | Express, Bun | REST API server |
-| **Database** | PostgreSQL, Drizzle ORM | Data persistence |
+| **Database** | PostgreSQL, Drizzle ORM | User data & clicks |
+| **Posts/Comments** | MongoDB, Mongoose | Discussion threads |
 | **Cache** | Redis, ioredis | Real-time updates & caching |
 | **Runtime** | Bun | Fast JavaScript runtime |
 | **Deploy** | Docker, Fly.io | Production deployment |
@@ -119,6 +127,7 @@ A complete, battle-tested template for building **Telegram Mini Apps** with real
 - [Docker](https://www.docker.com/) (optional)
 - [Telegram Bot Token](https://t.me/BotFather)
 - PostgreSQL & Redis (or use Docker)
+- MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free tier)
 
 ### 1. Clone & Install
 
@@ -145,6 +154,7 @@ BOT_TOKEN=your_telegram_bot_token
 DATABASE_URL=postgresql://admin:password@localhost:5432/databasev1
 REDIS_URL=redis://localhost:6379
 QUEUE_REDIS_URL=redis://localhost:6379
+MONGO_URL=mongodb://localhost:27017/komi
 MINI_APP_URL=http://localhost:5173
 REFERRAL_CRYPTO_KEY=generate_with_openssl_rand_hex_16
 REFERRAL_CRYPTO_IV=generate_with_openssl_rand_hex_8
@@ -155,12 +165,24 @@ BACKEND_PORT=4000
 BOT_TOKEN=your_telegram_bot_token
 DATABASE_URL=postgresql://admin:password@localhost:5432/databasev1
 REDIS_URL=redis://localhost:6379
+MONGO_URL=mongodb://localhost:27017/komi
 ```
 
 **Generate crypto keys:**
 ```bash
 openssl rand -hex 16  # REFERRAL_CRYPTO_KEY
 openssl rand -hex 8   # REFERRAL_CRYPTO_IV
+```
+
+**MongoDB Setup:**
+```bash
+# Option 1: Local MongoDB with Docker
+docker run -d --name mongodb -p 27017:27017 mongo:7
+
+# Option 2: MongoDB Atlas (Free tier)
+# Sign up at https://www.mongodb.com/cloud/atlas
+# Create free M0 cluster and get connection string
+MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/komi
 ```
 
 ### 3. Start Services
@@ -175,6 +197,7 @@ docker-compose up -d
 This starts:
 - PostgreSQL (port 5432)
 - Redis (port 6379)
+- MongoDB (port 27017)
 - Backend API (port 4000)
 - Bot
 
@@ -197,8 +220,10 @@ bun run dev
 ### 4. Open Your Bot
 
 1. Message your bot on Telegram
-2. Click "🎮 Play Game" button
-3. Start clicking! 🎉
+2. Send `/start` command
+3. **Play the clicker game**: Click "🎮 Play Game" button
+4. **Use comments feature**: Click "💬 Posts & Comments" button
+5. Start clicking and posting! 🎉
 
 ---
 
@@ -246,8 +271,9 @@ docker-compose up --build
 telegram-clicker-game/
 ├── bot/                    # Telegram bot
 │   ├── src/
-│   │   ├── commands/       # Bot commands (/start, /admin)
+│   │   ├── commands/       # Bot commands (/start, /posts, /admin)
 │   │   ├── menus/          # Interactive inline keyboards
+│   │   ├── messages/       # Centralized text/labels
 │   │   ├── services/       # Business logic
 │   │   ├── plugins/        # grammY plugins
 │   │   └── main.ts         # Bot entry point
@@ -255,19 +281,21 @@ telegram-clicker-game/
 │
 ├── backend/                # REST API
 │   ├── src/
-│   │   ├── controllers/    # Route handlers
-│   │   ├── middleware/     # Express middleware
+│   │   ├── controllers/    # Route handlers (clicker, posts)
+│   │   ├── routes/         # Route definitions with DI
+│   │   ├── middleware/     # Express middleware (Telegram auth)
 │   │   └── index.ts        # API entry point
 │   └── Dockerfile
 │
 ├── web/                    # React Mini App
 │   └── src/
-│       ├── components/     # UI components
-│       ├── hooks/          # React hooks
-│       └── App.tsx         # Main app
+│       ├── components/     # UI components (Clicker, Posts, Comments)
+│       ├── hooks/          # React hooks (useClicker, usePosts)
+│       └── App.tsx         # Main app with tab navigation
 │
 └── shared/                 # Shared code
-    ├── database/           # Schema & migrations
+    ├── database/           # Schemas (PostgreSQL + MongoDB)
+    ├── infra/database/     # DB clients (Postgres, Mongo, Redis)
     ├── repositories/       # Data access layer
     └── services/           # Business logic
 ```
@@ -277,19 +305,30 @@ telegram-clicker-game/
 #### Bot Menus
 - `ExistingUserStart` - Main menu with stats & leaderboard
 - `NewUserStart` - Onboarding for new users
+- `PostsMenu` - Browse and create posts
+- `CreatePostMenu` - Post creation with validation
 - `AdminPanel` - Admin controls
 - `Referrals` - Referral system management
 - `ChangeDisplayName` - User customization
 
 #### Backend Endpoints
-- `POST /api/click` - Record user click
-- `GET /api/stats/:userId` - Get user statistics
-- `GET /api/leaderboard` - Get top players
+
+**Clicker:**
+- `POST /api/clicker/click` - Record user click
+- `GET /api/clicker/stats` - Get user statistics
+
+**Posts & Comments:**
+- `POST /api/posts` - Create new post
+- `GET /api/posts` - List all posts
+- `GET /api/posts/:id` - Get single post
+- `POST /api/posts/:id/comments` - Add comment
+- `GET /api/posts/:id/comments?tree=true` - Get comment tree
 
 #### Services
 - `UserService` - User management
 - `ClickerService` - Click tracking & validation
 - `LeaderboardService` - Rankings & statistics
+- `PostService` - Posts & comments with tree building
 - `BroadcasterService` - Real-time updates
 - `NotificationService` - Push notifications
 
@@ -394,12 +433,23 @@ If this template helped you, please give it a ⭐ on GitHub!
 
 ## 🎯 Roadmap
 
+### Core Features
+- [x] Clicker game with combo system
+- [x] Real-time leaderboards
+- [x] Referral system
+- [x] Posts & Comments (tree structure)
+- [x] Tab navigation in Mini App
+
+### Upcoming
+- [ ] Edit/delete posts and comments
+- [ ] Like/reaction system
+- [ ] User mentions (@username)
+- [ ] Rich text formatting (Markdown)
+- [ ] Image attachments
 - [ ] Multi-language support
 - [ ] Achievement system
 - [ ] Daily rewards
 - [ ] Team/clan features
-- [ ] NFT integration
-- [ ] Mobile app (React Native)
 - [ ] Analytics dashboard
 
 ---
@@ -409,7 +459,8 @@ If this template helped you, please give it a ⭐ on GitHub!
 Built with:
 - [grammY](https://grammy.dev) - Telegram Bot Framework
 - [Bun](https://bun.sh) - Fast JavaScript Runtime
-- [Drizzle ORM](https://orm.drizzle.team) - TypeScript ORM
+- [Drizzle ORM](https://orm.drizzle.team) - TypeScript ORM for PostgreSQL
+- [Mongoose](https://mongoosejs.com) - MongoDB ODM
 - [Fly.io](https://fly.io) - Deployment Platform
 
 ---
