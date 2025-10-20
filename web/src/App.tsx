@@ -15,7 +15,15 @@ function App() {
   const tg = useTelegram();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>('clicker');
+  
+  // Deep linking: Read initial tab from URL hash
+  const getInitialTab = (): Tab => {
+    const hash = window.location.hash.slice(1); // Remove #
+    if (hash === 'posts') return 'posts';
+    return 'clicker';
+  };
+  
+  const [activeTab, setActiveTab] = useState<Tab>(getInitialTab());
 
   const {
     clickCount,
@@ -89,24 +97,24 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50">
       {/* Tab Navigation */}
-      <div className="flex bg-white shadow-md sticky top-0 z-50">
+      <div className="flex bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
         <button
-          className={`flex-1 py-4 px-6 text-base font-semibold transition-all duration-300 border-b-4 ${
+          className={`flex-1 py-3 px-4 text-sm font-semibold transition-all duration-200 border-b-2 ${
             activeTab === 'clicker'
-              ? 'text-primary-600 border-primary-600 bg-primary-50/50'
-              : 'text-gray-600 border-transparent hover:bg-gray-50'
+              ? 'text-primary-600 border-primary-600 bg-primary-50/30'
+              : 'text-gray-500 border-transparent hover:bg-gray-50'
           }`}
           onClick={() => setActiveTab('clicker')}
         >
           🎮 Clicker
         </button>
         <button
-          className={`flex-1 py-4 px-6 text-base font-semibold transition-all duration-300 border-b-4 ${
+          className={`flex-1 py-3 px-4 text-sm font-semibold transition-all duration-200 border-b-2 ${
             activeTab === 'posts'
-              ? 'text-primary-600 border-primary-600 bg-primary-50/50'
-              : 'text-gray-600 border-transparent hover:bg-gray-50'
+              ? 'text-primary-600 border-primary-600 bg-primary-50/30'
+              : 'text-gray-500 border-transparent hover:bg-gray-50'
           }`}
           onClick={() => {
             setActiveTab('posts');
@@ -118,9 +126,9 @@ function App() {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto overscroll-contain">
         {activeTab === 'clicker' && (
-          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gradient-purple p-5">
+          <div className="flex flex-col items-center justify-center min-h-full gradient-purple p-4">
             <Stats
               clickCount={clickCount}
               globalCount={globalCount}

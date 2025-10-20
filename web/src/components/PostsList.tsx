@@ -25,19 +25,19 @@ function PostsList({ posts, onSelectPost, isLoading }: PostsListProps) {
 	}
 
 	return (
-		<div className="flex flex-col gap-4 p-4">
+		<div className="flex flex-col gap-3 p-3">
 			{posts.map((post) => (
 				<div
 					key={post.id}
-					className="gradient-purple rounded-2xl p-6 cursor-pointer transition-all duration-200 
-					           hover:scale-[1.02] hover:shadow-2xl active:scale-100 shadow-lg"
+					className="gradient-purple rounded-xl p-4 cursor-pointer transition-all duration-200 
+					           hover:scale-[1.01] hover:shadow-lg active:scale-100 shadow-md"
 					onClick={() => onSelectPost(post)}
 				>
-					<div className="text-white text-base leading-relaxed mb-4 break-words">
+					<div className="text-white text-sm leading-relaxed mb-3 break-words">
 						{post.content}
 					</div>
-					<div className="flex justify-between items-center text-sm text-white/80">
-						<span className="font-medium">By User {post.authorId.slice(0, 8)}</span>
+					<div className="flex justify-between items-center text-xs text-white/80">
+						<span className="font-medium">User {post.authorId.slice(0, 8)}</span>
 						<span className="italic">
 							{new Date(post.createdAt).toLocaleDateString()}
 						</span>

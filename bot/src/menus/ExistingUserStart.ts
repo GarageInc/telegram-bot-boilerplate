@@ -40,7 +40,7 @@ export const ExistingUserStart = ({
 
 			return clicker.formatWelcomeMessage(userClicks, globalClicks, leaderboard, userId, userRank);
 		})
-		.webApp("🎮 Play Game", MINI_APP_URL)
+		.webApp("🎮 Play Game", `${MINI_APP_URL}#clicker`)
 		.row()
 		.text("💬 Posts & Comments", ctx => ctx.sendMenu("PostsMenu", { state: null }))
 		.row()

@@ -14,7 +14,7 @@ export const PostsMenu = (_deps: BotDependencies) => {
 	return createMenu("PostsMenu")
 		.init<BotContext>()
 		.headerText(posts.header())
-		.webApp("💬 Open Comments", MINI_APP_URL)
+		.webApp("💬 Open Comments", `${MINI_APP_URL}#posts`)
 		.row()
 		.text("📝 Create New Post", ctx => ctx.sendMenu("CreatePostMenu", { state: null }))
 		.row()

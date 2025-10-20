@@ -43,11 +43,11 @@ export default function ClickButton({ onClick }: ClickButtonProps) {
   };
 
   return (
-    <div className="relative my-8">
+    <div className="relative my-6">
       <button
-        className="w-48 h-48 rounded-full bg-white shadow-2xl font-bold text-4xl text-primary-600 
+        className="w-36 h-36 rounded-full bg-white shadow-xl font-bold text-2xl text-primary-600 
                    active:scale-95 hover:scale-105 transition-all duration-150 
-                   border-8 border-primary-200 hover:border-primary-300
+                   border-4 border-primary-200 hover:border-primary-300
                    cursor-pointer select-none relative overflow-visible"
         onClick={handleClick}
         onTouchStart={(e) => {
@@ -61,7 +61,7 @@ export default function ClickButton({ onClick }: ClickButtonProps) {
       {animations.map(anim => (
         <div
           key={anim.id}
-          className="absolute text-white font-bold text-2xl pointer-events-none animate-fade-in"
+          className="absolute text-white font-bold text-lg pointer-events-none animate-fade-in"
           style={{ 
             left: `${anim.x}px`, 
             top: `${anim.y}px`,

@@ -10,24 +10,24 @@ function formatNumber(num: number): string {
 
 export default function Stats({ clickCount, globalCount, pendingClicks }: StatsProps) {
   return (
-    <div className="text-center text-white mb-8 animate-fade-in">
-      <div className="space-y-1">
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg">
-          <span className="text-sm opacity-90">Your clicks: </span>
-          <span className="text-2xl font-bold ml-2">{formatNumber(clickCount)}</span>
+    <div className="text-center text-white mb-6 animate-fade-in w-full max-w-sm">
+      <h1 className="text-2xl font-bold mb-4 drop-shadow-lg">🎮 Clicker Game</h1>
+      <div className="space-y-2">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md">
+          <span className="text-xs opacity-90">Your clicks: </span>
+          <span className="text-lg font-bold ml-1">{formatNumber(clickCount)}</span>
         </div>
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg">
-          <span className="text-sm opacity-90">Global clicks: </span>
-          <span className="text-2xl font-bold ml-2">{formatNumber(globalCount)}</span>
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md">
+          <span className="text-xs opacity-90">Global clicks: </span>
+          <span className="text-lg font-bold ml-1">{formatNumber(globalCount)}</span>
         </div>
         {pendingClicks > 0 && (
-          <div className="bg-yellow-400/20 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg animate-pulse-soft">
-            <span className="text-sm opacity-90">Pending: </span>
-            <span className="text-xl font-bold ml-2">{pendingClicks}</span>
+          <div className="bg-yellow-400/20 backdrop-blur-sm rounded-lg px-4 py-2 shadow-md animate-pulse-soft">
+            <span className="text-xs opacity-90">Pending: </span>
+            <span className="text-base font-bold ml-1">{pendingClicks}</span>
           </div>
         )}
       </div>
     </div>
   );
 }
-
