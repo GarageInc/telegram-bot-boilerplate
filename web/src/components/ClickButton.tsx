@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import './ClickButton.css';
 
 interface ClickButtonProps {
   onClick: () => void;
@@ -44,9 +43,12 @@ export default function ClickButton({ onClick }: ClickButtonProps) {
   };
 
   return (
-    <div className="click-button-container">
+    <div className="relative my-8">
       <button
-        className="click-button"
+        className="w-48 h-48 rounded-full bg-white shadow-2xl font-bold text-4xl text-primary-600 
+                   active:scale-95 hover:scale-105 transition-all duration-150 
+                   border-8 border-primary-200 hover:border-primary-300
+                   cursor-pointer select-none relative overflow-visible"
         onClick={handleClick}
         onTouchStart={(e) => {
           e.preventDefault();
@@ -59,12 +61,29 @@ export default function ClickButton({ onClick }: ClickButtonProps) {
       {animations.map(anim => (
         <div
           key={anim.id}
-          className="click-animation"
-          style={{ left: `${anim.x}px`, top: `${anim.y}px` }}
+          className="absolute text-white font-bold text-2xl pointer-events-none animate-fade-in"
+          style={{ 
+            left: `${anim.x}px`, 
+            top: `${anim.y}px`,
+            animation: 'fadeOut 1s ease-out forwards'
+          }}
         >
           +1
         </div>
       ))}
+
+      <style>{`
+        @keyframes fadeOut {
+          0% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-50px) scale(1.2);
+          }
+        }
+      `}</style>
     </div>
   );
 }

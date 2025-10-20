@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './App.css';
 import ClickButton from './components/ClickButton';
 import Stats from './components/Stats';
 import ComboIndicator from './components/ComboIndicator';
@@ -73,31 +72,42 @@ function App() {
 
   if (error) {
     return (
-      <div className="container">
-        <div className="error">{error}</div>
+      <div className="flex items-center justify-center min-h-screen gradient-purple p-5">
+        <div className="text-center text-white text-lg bg-red-500/20 backdrop-blur-sm rounded-2xl p-6 max-w-md">
+          {error}
+        </div>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="container">
-        <div className="loading">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen gradient-purple">
+        <div className="text-center text-white text-xl animate-pulse">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="app-wrapper">
-      <div className="tab-navigation">
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Tab Navigation */}
+      <div className="flex bg-white shadow-md sticky top-0 z-50">
         <button
-          className={`tab-btn ${activeTab === 'clicker' ? 'active' : ''}`}
+          className={`flex-1 py-4 px-6 text-base font-semibold transition-all duration-300 border-b-4 ${
+            activeTab === 'clicker'
+              ? 'text-primary-600 border-primary-600 bg-primary-50/50'
+              : 'text-gray-600 border-transparent hover:bg-gray-50'
+          }`}
           onClick={() => setActiveTab('clicker')}
         >
           🎮 Clicker
         </button>
         <button
-          className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`}
+          className={`flex-1 py-4 px-6 text-base font-semibold transition-all duration-300 border-b-4 ${
+            activeTab === 'posts'
+              ? 'text-primary-600 border-primary-600 bg-primary-50/50'
+              : 'text-gray-600 border-transparent hover:bg-gray-50'
+          }`}
           onClick={() => {
             setActiveTab('posts');
             setSelectedPost(null);
@@ -107,9 +117,10 @@ function App() {
         </button>
       </div>
 
-      <div className="tab-content">
+      {/* Tab Content */}
+      <div className="flex-1 overflow-y-auto">
         {activeTab === 'clicker' && (
-          <div className="container">
+          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] gradient-purple p-5">
             <Stats
               clickCount={clickCount}
               globalCount={globalCount}
@@ -140,7 +151,11 @@ function App() {
                 isLoading={postsLoading}
               />
             )}
-            {postsError && <div className="error">{postsError}</div>}
+            {postsError && (
+              <div className="text-center p-5 text-red-500 bg-red-50 border border-red-200 rounded-lg m-4">
+                {postsError}
+              </div>
+            )}
           </>
         )}
       </div>

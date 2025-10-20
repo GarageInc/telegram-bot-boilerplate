@@ -1,5 +1,3 @@
-import './Stats.css';
-
 interface StatsProps {
   clickCount: number;
   globalCount: number;
@@ -12,16 +10,23 @@ function formatNumber(num: number): string {
 
 export default function Stats({ clickCount, globalCount, pendingClicks }: StatsProps) {
   return (
-    <div className="stats">
-      <h1>🎮 Clicker Game</h1>
-      <div className="stat-item">
-        Your clicks: <span className="stat-value">{formatNumber(clickCount)}</span>
-      </div>
-      <div className="stat-item">
-        Global clicks: <span className="stat-value">{formatNumber(globalCount)}</span>
-      </div>
-      <div className="stat-item">
-        Pending: <span className="stat-value">{pendingClicks}</span>
+    <div className="text-center text-white mb-8 animate-fade-in">
+      <h1 className="text-4xl font-bold mb-6 drop-shadow-lg">🎮 Clicker Game</h1>
+      <div className="space-y-3">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg">
+          <span className="text-sm opacity-90">Your clicks: </span>
+          <span className="text-2xl font-bold ml-2">{formatNumber(clickCount)}</span>
+        </div>
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg">
+          <span className="text-sm opacity-90">Global clicks: </span>
+          <span className="text-2xl font-bold ml-2">{formatNumber(globalCount)}</span>
+        </div>
+        {pendingClicks > 0 && (
+          <div className="bg-yellow-400/20 backdrop-blur-sm rounded-xl px-6 py-3 shadow-lg animate-pulse-soft">
+            <span className="text-sm opacity-90">Pending: </span>
+            <span className="text-xl font-bold ml-2">{pendingClicks}</span>
+          </div>
+        )}
       </div>
     </div>
   );
