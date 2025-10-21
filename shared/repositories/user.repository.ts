@@ -7,6 +7,23 @@ export const makeUserRepository = (db: NodePgDatabase) => {
 		return await db.select().from(users);
 	};
 
+	/**
+	 * Find users in batches for memory-efficient processing.
+	 * @param batchSize - Number of users to fetch per batch
+	 * @param offset - Offset for pagination
+	 */
+	const findAllPaginated = async (batchSize: number = 1000, offset: number = 0) => {
+		return await db.select().from(users).limit(batchSize).offset(offset);
+	};
+
+	/**
+	 * Get total count of users in the database.
+	 */
+	const getUserCount = async (): Promise<number> => {
+		const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+		return result[0]?.count ?? 0;
+	};
+
 	const findById = async (id: string) => {
 		const result = await db.select().from(users).where(eq(users.id, id));
 		return result.length > 0 ? result[0] : null;
@@ -161,6 +178,8 @@ export const makeUserRepository = (db: NodePgDatabase) => {
 
 	return {
 		findAll,
+		findAllPaginated,
+		getUserCount,
 		findById,
 		newUser,
 		updateUser,

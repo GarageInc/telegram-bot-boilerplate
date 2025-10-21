@@ -14,6 +14,8 @@ import {
 	TELEGRAM_API_ID,
 	TELEGRAM_API_HASH,
 	REDIS_URL,
+	ENABLE_CACHE_WARMING,
+	CACHE_WARMING_BATCH_SIZE,
 	opt,
 } from "../../shared/env.ts";
 import { makeClient } from "../../shared/infra/database/client.ts";
@@ -233,9 +235,6 @@ const broadcasterService = makeBroadcasterService({
 });
 deps.broadcasterService = broadcasterService;
 
-// Warm up the clicker cache on startup
-deps.clickerService.warmCache().catch((err: Error) => console.error("Failed to warm clicker cache:", err));
-
 // Start periodic sync for active users
 deps.clickerService.startPeriodicSync();
 
@@ -327,6 +326,17 @@ if (ENABLE_WEBHOOKS) {
 	await deps.broadcasterService.start();
 	console.log("Broadcaster service started in webhook mode");
 
+	// Warm up the clicker cache asynchronously (non-blocking)
+	if (ENABLE_CACHE_WARMING) {
+		console.log("Starting cache warming in background...");
+		deps.clickerService.warmCache(CACHE_WARMING_BATCH_SIZE).catch((err: Error) => {
+			console.error("Failed to warm clicker cache:", err);
+			deps.slackService.sendMessage(`Cache warming failed: ${err.message}`).catch(noop);
+		});
+	} else {
+		console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
+	}
+
 	// Store server reference for shutdown
 	(globalThis as any).__bunServer = server;
 } else if (process.env.NODE_ENV !== "test") {
@@ -336,6 +346,17 @@ if (ENABLE_WEBHOOKS) {
 			// Start broadcaster service
 			await deps.broadcasterService.start();
 			console.log("Broadcaster service started in long-polling mode");
+
+			// Warm up the clicker cache asynchronously (non-blocking)
+			if (ENABLE_CACHE_WARMING) {
+				console.log("Starting cache warming in background...");
+				deps.clickerService.warmCache(CACHE_WARMING_BATCH_SIZE).catch((err: Error) => {
+					console.error("Failed to warm clicker cache:", err);
+					deps.slackService.sendMessage(`Cache warming failed: ${err.message}`).catch(noop);
+				});
+			} else {
+				console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
+			}
 		},
 	});
 }

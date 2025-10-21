@@ -5,6 +5,8 @@ export class ClickerServiceError extends Error {}
 export interface UserRepository {
 	findById(id: string): Promise<any>;
 	findAll(): Promise<any[]>;
+	findAllPaginated(batchSize: number, offset: number): Promise<any[]>;
+	getUserCount(): Promise<number>;
 	updateUser(id: string, updates: any): Promise<any>;
 	getTopClickerUsers(limit: number): Promise<any[]>;
 	getUserRank(userId: string): Promise<number | null>;
@@ -107,24 +109,51 @@ export function makeClickerService({ redisService, userRepository }: Dependencie
 		return syncedCount;
 	};
 
-	const warmCache = async (): Promise<void> => {
-		const users = await userRepository.findAll();
+	/**
+	 * Warm cache in batches to avoid loading all users into memory at once.
+	 * This is memory-efficient and prevents OOM errors on large databases.
+	 */
+	const warmCache = async (batchSize: number = 1000): Promise<void> => {
+		console.log(`Starting cache warming with batch size: ${batchSize}`);
+		
+		const totalUsers = await userRepository.getUserCount();
+		console.log(`Total users to process: ${totalUsers}`);
 
 		let globalTotal = 0;
+		let processedUsers = 0;
+		let offset = 0;
 
-		for (const user of users) {
-			const count = user.clickCount ?? 0;
-			globalTotal += count;
+		while (offset < totalUsers) {
+			try {
+				const users = await userRepository.findAllPaginated(batchSize, offset);
+				
+				if (users.length === 0) break;
 
-			if (count > 0) {
-				const userKey = `${USER_CLICKS_PREFIX}${user.id}`;
-				await redisService.setString(userKey, count.toString());
+				for (const user of users) {
+					const count = user.clickCount ?? 0;
+					globalTotal += count;
+
+					if (count > 0) {
+						const userKey = `${USER_CLICKS_PREFIX}${user.id}`;
+						await redisService.setString(userKey, count.toString());
+					}
+				}
+
+				processedUsers += users.length;
+				offset += batchSize;
+
+				// Log progress every batch
+				console.log(`Cache warming progress: ${processedUsers}/${totalUsers} users (${Math.round(processedUsers / totalUsers * 100)}%)`);
+			} catch (error) {
+				console.error(`Error warming cache at offset ${offset}:`, error);
+				// Continue with next batch even if one fails
+				offset += batchSize;
 			}
 		}
 
 		await redisService.setString(GLOBAL_CLICKS_KEY, globalTotal.toString());
 
-		console.log(`Clicker cache warmed: ${users.length} users, ${globalTotal} total clicks`);
+		console.log(`✅ Clicker cache warmed: ${processedUsers} users, ${globalTotal} total clicks`);
 	};
 
 	const getActiveUsers = async (): Promise<string[]> => {

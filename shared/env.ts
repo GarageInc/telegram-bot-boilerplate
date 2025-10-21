@@ -49,6 +49,10 @@ export const SLACK_WEBHOOK = optFunc("SLACK_WEBHOOK");
 export const REFERRAL_CRYPTO_KEY = reqd("REFERRAL_CRYPTO_KEY");
 export const REFERRAL_CRYPTO_IV = reqd("REFERRAL_CRYPTO_IV");
 
+// Cache warming configuration
+export const ENABLE_CACHE_WARMING = optFunc("ENABLE_CACHE_WARMING", value => value !== "false"); // Defaults to true
+export const CACHE_WARMING_BATCH_SIZE = optFunc("CACHE_WARMING_BATCH_SIZE", size => (size != null && parseInt(size, 10)) || 1000);
+
 // -------------------------------------------------------------------------------------------------
 // ⚠️: This HAS to be at the end of the file! DO NOT MOVE!
 // -------------------------------------------------------------------------------------------------
