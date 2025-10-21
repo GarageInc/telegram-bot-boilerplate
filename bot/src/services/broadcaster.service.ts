@@ -33,6 +33,8 @@ const MAX_UPDATE_INTERVAL_MS = 30000; // 30 seconds max interval
 export const makeBroadcasterService = ({ bot, redisService, clickerService, leaderboardService }: Dependencies) => {
 	let updateInterval: ReturnType<typeof setTimeout> | null = null;
 	let isRunning = false;
+	let consecutiveErrors = 0;
+	const MAX_CONSECUTIVE_ERRORS = 5; // Circuit breaker threshold
 
 	/**
 	 * Register an active session for live updates.
@@ -156,6 +158,7 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 
 	/**
 	 * Start the broadcaster service.
+	 * 🔧 FIX: Added circuit breaker and error handling
 	 */
 	const start = async (): Promise<void> => {
 		if (isRunning) {
@@ -164,26 +167,55 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 		}
 
 		isRunning = true;
+		consecutiveErrors = 0;
 		console.log("Broadcaster service started via 'start' method");
 
-		// Dynamic update loop
+		// Dynamic update loop with circuit breaker
 		const updateLoop = async () => {
-			if (!isRunning) return;
-
-			const sessions = await getActiveSessions();
-			const interval = calculateUpdateInterval(sessions.length);
-
-			if (sessions.length > 0) {
-				console.log(`Broadcasting update to ${sessions.length} sessions (interval: ${interval}ms)`);
-				await broadcastUpdate();
+			if (!isRunning) {
+				console.log("Broadcaster service stopping, loop exiting");
+				return;
 			}
 
-			// Schedule next update with adaptive interval
-			updateInterval = setTimeout(updateLoop, interval);
+			// Circuit breaker: Stop if too many consecutive errors
+			if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+				console.error(`🚨 Broadcaster circuit breaker triggered after ${consecutiveErrors} consecutive errors. Stopping service.`);
+				isRunning = false;
+				return;
+			}
+
+			try {
+				const sessions = await getActiveSessions();
+				const interval = calculateUpdateInterval(sessions.length);
+
+				if (sessions.length > 0) {
+					console.log(`Broadcasting update to ${sessions.length} sessions (interval: ${interval}ms)`);
+					await broadcastUpdate();
+					consecutiveErrors = 0; // Reset error counter on success
+				}
+
+				// Schedule next update with adaptive interval
+				if (isRunning) {
+					updateInterval = setTimeout(updateLoop, interval);
+				}
+			} catch (error) {
+				consecutiveErrors++;
+				console.error(`Broadcaster updateLoop error (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}):`, error);
+				
+				// Still schedule next update but with backoff
+				if (isRunning && consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
+					const backoffInterval = BASE_UPDATE_INTERVAL_MS * Math.pow(2, consecutiveErrors);
+					console.log(`Retrying in ${backoffInterval}ms with exponential backoff`);
+					updateInterval = setTimeout(updateLoop, Math.min(backoffInterval, MAX_UPDATE_INTERVAL_MS));
+				}
+			}
 		};
 
 		// Start the loop
-		updateLoop();
+		updateLoop().catch(error => {
+			console.error("Fatal error in broadcaster updateLoop:", error);
+			isRunning = false;
+		});
 	};
 
 	/**

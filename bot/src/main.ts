@@ -17,12 +17,12 @@ import {
 	ENABLE_CACHE_WARMING,
 	CACHE_WARMING_BATCH_SIZE,
 	opt,
+	MONGO_URL,
 } from "../../shared/env.ts";
 import { makeClient } from "../../shared/infra/database/client.ts";
 
 import { hash } from "node:crypto";
 import { Bot, BotError, Context, session, webhookCallback } from "grammy";
-import type { Update } from "grammy/types";
 import { TelegramClient } from "@mtcute/bun";
 
 //#region PLUGINS AND SETUP
@@ -54,6 +54,7 @@ import { otherCommands, startCommand } from "./command/index.ts";
 import { error } from "./messages/index.ts";
 import type { BotCommandSetup } from "./command/types.ts";
 import { formatError, getErrorMessage } from "./utils/index.ts";
+import { createMemoryMonitor } from "./utils/memoryMonitor.ts";
 //#endregion
 
 if (EXTRA_TRACING.size > 0) {
@@ -61,6 +62,9 @@ if (EXTRA_TRACING.size > 0) {
 }
 
 const noop = () => void 0;
+
+// Memory monitor will be initialized after deps are created
+let memoryMonitor: ReturnType<typeof createMemoryMonitor> | undefined;
 
 async function errorHandler(err: BotError<BotContext>, useMenu: boolean) {
 	const ctx = err.ctx;
@@ -117,8 +121,7 @@ export function setup(bot: Bot<BotContext>, deps: BotDependencies, sender?: { cl
 
 	bot.use((ctx, next) => {
 		if (!ctx.from || !ctx.chat) return next();
-		// TODO: perhaps attempt to fetch wallets from the database here
-		// and move this middleware to an appropriate location?
+		// TODO:  move this middleware to an appropriate location?
 		if (!ctx.session.userData) ctx.session.userData = getDefaultSession().userData;
 		return next();
 	});
@@ -155,12 +158,6 @@ export function setup(bot: Bot<BotContext>, deps: BotDependencies, sender?: { cl
 
 	composer.command("start", startCommand.getHandler(deps));
 
-	composer.on("::bot_command", (ctx, next) =>
-		// cannot use any other commands if the user has no wallets
-		// force them to go through onboarding
-		next(),
-	);
-
 	for (const command of otherCommands) {
 		composer.command(command.command, command.getHandler(deps));
 	}
@@ -191,7 +188,6 @@ const { connectMongoDB } = await import("../../shared/infra/database/mongo-clien
 const { makePostRepository } = await import("../../shared/repositories/post.repository.ts");
 
 // MongoDB URL for posts/comments
-const MONGO_URL = opt("MONGO_URL") || "mongodb://localhost:27017/komi";
 
 // Connect to MongoDB before initializing services
 await connectMongoDB(MONGO_URL);
@@ -237,6 +233,18 @@ deps.broadcasterService = broadcasterService;
 
 // Start periodic sync for active users
 deps.clickerService.startPeriodicSync();
+
+// Initialize memory monitor
+memoryMonitor = createMemoryMonitor({
+	maxSamples: 120, // Keep 2 hours of data (at 1 min intervals)
+	intervalMs: 60000, // Sample every minute
+	alertThresholdMB: 400, // Alert at 400MB (adjust based on your server's RAM)
+	onAlert: (stats: any, message: string) => {
+		console.error(message);
+		// Send alert to Slack if configured
+		deps.slackService.sendMessage(`🚨 Bot Memory Alert\n\n${message}\n\nHeap Used: ${(stats.heapUsed / 1024 / 1024).toFixed(2)} MB`).catch(noop);
+	},
+});
 
 const sender: { client: TelegramClient | undefined } = { client: undefined };
 
@@ -337,6 +345,12 @@ if (ENABLE_WEBHOOKS) {
 		console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
 	}
 
+	// Start memory monitoring
+	if (memoryMonitor) {
+		memoryMonitor.startMonitoring();
+		console.log("Memory monitoring started");
+	}
+
 	// Store server reference for shutdown
 	(globalThis as any).__bunServer = server;
 } else if (process.env.NODE_ENV !== "test") {
@@ -356,6 +370,12 @@ if (ENABLE_WEBHOOKS) {
 				});
 			} else {
 				console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
+			}
+
+			// Start memory monitoring
+			if (memoryMonitor) {
+				memoryMonitor.startMonitoring();
+				console.log("Memory monitoring started");
 			}
 		},
 	});
@@ -388,6 +408,20 @@ async function shutdown(signal: string) {
 
 	console.log("Stopping periodic sync...");
 	deps.clickerService.stopPeriodicSync();
+
+	if (memoryMonitor) {
+		const monitor = memoryMonitor; // Capture for type narrowing
+		console.log("Stopping memory monitor...");
+		monitor.stopMonitoring();
+
+		// Log final memory statistics
+		const summary = monitor.getSummary();
+		console.log("Final memory statistics:");
+		console.log(`  Current: ${summary.currentMemoryMB.toFixed(2)} MB`);
+		console.log(`  Average: ${summary.avgMemoryMB.toFixed(2)} MB`);
+		console.log(`  Max: ${summary.maxMemoryMB.toFixed(2)} MB`);
+		console.log(`  Min: ${summary.minMemoryMB.toFixed(2)} MB`);
+	}
 
 	// Disconnect MongoDB
 	console.log("Stopping MongoDB...");

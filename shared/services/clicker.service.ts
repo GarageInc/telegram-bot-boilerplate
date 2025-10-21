@@ -20,6 +20,7 @@ interface Dependencies {
 const GLOBAL_CLICKS_KEY = "clicker:global:total";
 const USER_CLICKS_PREFIX = "clicker:user:";
 const ACTIVE_USER_PREFIX = "clicker:active:";
+const ACTIVE_USERS_SET_KEY = "clicker:active_users_set"; // 🔧 FIX: Use a SET instead of key pattern
 const SYNC_BATCH_SIZE = 100;
 const SYNC_INTERVAL_MS = 5000; // 5 seconds
 const ACTIVE_USER_TTL = 30; // 30 seconds - users are considered active if they clicked in last 30s
@@ -36,6 +37,9 @@ export function makeClickerService({ redisService, userRepository }: Dependencie
 
 		// Mark user as active with TTL
 		await redisService.setString(activeKey, Date.now().toString(), ACTIVE_USER_TTL);
+
+		// 🔧 FIX: Add user to active users SET for efficient tracking
+		await redisService.sadd(ACTIVE_USERS_SET_KEY, userId);
 
 		await redisService.sadd("clicker:pending_sync", userId);
 
@@ -156,44 +160,79 @@ export function makeClickerService({ redisService, userRepository }: Dependencie
 		console.log(`✅ Clicker cache warmed: ${processedUsers} users, ${globalTotal} total clicks`);
 	};
 
+	/**
+	 * 🔧 FIX: Get active users from SET instead of using KEYS command
+	 * KEYS command blocks Redis and is O(N) - never use in production!
+	 */
 	const getActiveUsers = async (): Promise<string[]> => {
-		const pattern = `${ACTIVE_USER_PREFIX}*`;
-		const keysList = await redisService.keys(pattern);
-		return keysList.map((key: string) => key.replace(ACTIVE_USER_PREFIX, ""));
+		// Get all users from the active users SET
+		const userIds = await redisService.smembers(ACTIVE_USERS_SET_KEY);
+		
+		// Filter out expired users by checking their TTL
+		const activeUsers: string[] = [];
+		const now = Date.now();
+		
+		for (const userId of userIds) {
+			const activeKey = `${ACTIVE_USER_PREFIX}${userId}`;
+			const lastActiveStr = await redisService.getString(activeKey);
+			
+			if (lastActiveStr) {
+				const lastActive = parseInt(lastActiveStr, 10);
+				const timeSinceActive = now - lastActive;
+				
+				if (timeSinceActive < ACTIVE_USER_TTL * 1000) {
+					activeUsers.push(userId);
+				} else {
+					// Remove expired user from the SET
+					await redisService.srem(ACTIVE_USERS_SET_KEY, userId);
+				}
+			} else {
+				// Key expired, remove from SET
+				await redisService.srem(ACTIVE_USERS_SET_KEY, userId);
+			}
+		}
+		
+		return activeUsers;
 	};
 
 	const syncActiveUsers = async (): Promise<number> => {
-		const activeUserIds = await getActiveUsers();
-		if (activeUserIds.length === 0) return 0;
+		try {
+			const activeUserIds = await getActiveUsers();
+			if (activeUserIds.length === 0) return 0;
 
-		let syncedCount = 0;
-		for (const userId of activeUserIds) {
-			// Only sync if they're in the pending sync set
-			const isPending = await redisService.sismember("clicker:pending_sync", userId);
-			if (!isPending) continue;
+			let syncedCount = 0;
+			for (const userId of activeUserIds) {
+				// Only sync if they're in the pending sync set
+				const isPending = await redisService.sismember("clicker:pending_sync", userId);
+				if (!isPending) continue;
 
-			try {
-				const userKey = `${USER_CLICKS_PREFIX}${userId}`;
-				const clicks = await redisService.getString(userKey);
+				try {
+					const userKey = `${USER_CLICKS_PREFIX}${userId}`;
+					const clicks = await redisService.getString(userKey);
 
-				if (clicks !== null) {
-					await userRepository.updateUser(userId, {
-						clickCount: parseInt(clicks, 10),
-					});
-					syncedCount++;
+					if (clicks !== null) {
+						await userRepository.updateUser(userId, {
+							clickCount: parseInt(clicks, 10),
+						});
+						syncedCount++;
+					}
+
+					await redisService.srem("clicker:pending_sync", userId);
+				} catch (error) {
+					console.error(`Failed to sync active user ${userId}:`, error);
+					// Continue with other users even if one fails
 				}
-
-				await redisService.srem("clicker:pending_sync", userId);
-			} catch (error) {
-				console.error(`Failed to sync active user ${userId}:`, error);
 			}
-		}
 
-		if (syncedCount > 0) {
-			console.log(`Synced ${syncedCount} active users to database`);
-		}
+			if (syncedCount > 0) {
+				console.log(`Synced ${syncedCount} active users to database`);
+			}
 
-		return syncedCount;
+			return syncedCount;
+		} catch (error) {
+			console.error("syncActiveUsers failed:", error);
+			return 0;
+		}
 	};
 
 	const startPeriodicSync = (): void => {

@@ -25,6 +25,7 @@ export interface NotificationService {
 
 export function makeNotificationService(): NotificationService {
 	// Create the notification queue
+	// 🔧 FIX: Add proper job retention limits to prevent memory leaks
 	const notificationQueue = new Queue<SendMessageJob>("notifications", {
 		redis: {
 			host: QUEUE_REDIS_URL.hostname,
@@ -33,8 +34,16 @@ export function makeNotificationService(): NotificationService {
 		},
 		defaultJobOptions: {
 			attempts: 3,
-			removeOnComplete: true,
-			removeOnFail: true,
+			// 🔧 FIX: Limit retention of completed jobs
+			removeOnComplete: {
+				age: 3600, // Keep completed jobs for 1 hour only
+				count: 100, // Keep max 100 completed jobs
+			},
+			// 🔧 FIX: Limit retention of failed jobs
+			removeOnFail: {
+				age: 86400, // Keep failed jobs for 24 hours for debugging
+				count: 50, // Keep max 50 failed jobs
+			},
 			backoff: {
 				type: "exponential",
 				delay: RETRY_DELAY,
