@@ -116,6 +116,13 @@ export class MemoryMonitor {
 		// Calculate memory growth rate
 		const first = this.trend.samples[0];
 		const last = this.trend.samples[this.trend.samples.length - 1];
+		if (!first || !last) {
+			return {
+				isLeaking: false,
+				growthRateMBPerHour: 0,
+				message: "Not enough samples for analysis",
+			};
+		}
 		const timeDiffHours = (last.timestamp - first.timestamp) / (1000 * 60 * 60);
 		const memoryDiffMB = (last.heapUsed - first.heapUsed) / 1024 / 1024;
 		const growthRateMBPerHour = memoryDiffMB / timeDiffHours;
