@@ -1,5 +1,5 @@
 # Use the official Bun image as base
-FROM oven/bun:1.2.19 AS base
+FROM oven/bun:1.3.0 AS base
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ COPY shared/ /app/shared/
 COPY bot/src/ /app/bot/src/
 
 # Production image
-FROM oven/bun:1.2.19-slim AS production
+FROM oven/bun:1.3.0-slim AS production
 
 WORKDIR /app
 
