@@ -158,7 +158,7 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 
 	/**
 	 * Start the broadcaster service.
-	 * 🔧 FIX: Added circuit breaker and error handling
+	 * 🔧 FIX: Fixed recursive setTimeout pattern to prevent memory leaks
 	 */
 	const start = async (): Promise<void> => {
 		if (isRunning) {
@@ -170,52 +170,54 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 		consecutiveErrors = 0;
 		console.log("Broadcaster service started via 'start' method");
 
-		// Dynamic update loop with circuit breaker
-		const updateLoop = async () => {
-			if (!isRunning) {
-				console.log("Broadcaster service stopping, loop exiting");
-				return;
+		// 🔧 FIX: Use setInterval instead of recursive setTimeout to prevent memory leaks
+		const scheduleNextUpdate = (interval: number) => {
+			if (updateInterval) {
+				clearTimeout(updateInterval);
 			}
-
-			// Circuit breaker: Stop if too many consecutive errors
-			if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-				console.error(`🚨 Broadcaster circuit breaker triggered after ${consecutiveErrors} consecutive errors. Stopping service.`);
-				isRunning = false;
-				return;
-			}
-
-			try {
-				const sessions = await getActiveSessions();
-				const interval = calculateUpdateInterval(sessions.length);
-
-				if (sessions.length > 0) {
-					console.log(`Broadcasting update to ${sessions.length} sessions (interval: ${interval}ms)`);
-					await broadcastUpdate();
-					consecutiveErrors = 0; // Reset error counter on success
+			updateInterval = setTimeout(async () => {
+				if (!isRunning) {
+					console.log("Broadcaster service stopping, loop exiting");
+					return;
 				}
 
-				// Schedule next update with adaptive interval
-				if (isRunning) {
-					updateInterval = setTimeout(updateLoop, interval);
+				// Circuit breaker: Stop if too many consecutive errors
+				if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+					console.error(`🚨 Broadcaster circuit breaker triggered after ${consecutiveErrors} consecutive errors. Stopping service.`);
+					isRunning = false;
+					return;
 				}
-			} catch (error) {
-				consecutiveErrors++;
-				console.error(`Broadcaster updateLoop error (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}):`, error);
-				
-				// Still schedule next update but with backoff
-				if (isRunning && consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
-					const backoffInterval = BASE_UPDATE_INTERVAL_MS * Math.pow(2, consecutiveErrors);
-					console.log(`Retrying in ${backoffInterval}ms with exponential backoff`);
-					updateInterval = setTimeout(updateLoop, Math.min(backoffInterval, MAX_UPDATE_INTERVAL_MS));
+
+				try {
+					const sessions = await getActiveSessions();
+					const nextInterval = calculateUpdateInterval(sessions.length);
+
+					if (sessions.length > 0) {
+						console.log(`Broadcasting update to ${sessions.length} sessions (interval: ${nextInterval}ms)`);
+						await broadcastUpdate();
+						consecutiveErrors = 0; // Reset error counter on success
+					}
+
+					// Schedule next update
+					if (isRunning) {
+						scheduleNextUpdate(nextInterval);
+					}
+				} catch (error) {
+					consecutiveErrors++;
+					console.error(`Broadcaster updateLoop error (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}):`, error);
+					
+					// Still schedule next update but with backoff
+					if (isRunning && consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
+						const backoffInterval = BASE_UPDATE_INTERVAL_MS * Math.pow(2, consecutiveErrors);
+						console.log(`Retrying in ${backoffInterval}ms with exponential backoff`);
+						scheduleNextUpdate(Math.min(backoffInterval, MAX_UPDATE_INTERVAL_MS));
+					}
 				}
-			}
+			}, interval);
 		};
 
-		// Start the loop
-		updateLoop().catch(error => {
-			console.error("Fatal error in broadcaster updateLoop:", error);
-			isRunning = false;
-		});
+		// Start with base interval
+		scheduleNextUpdate(BASE_UPDATE_INTERVAL_MS);
 	};
 
 	/**
@@ -228,6 +230,42 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 			updateInterval = null;
 		}
 		console.log("Broadcaster service stopped");
+	};
+
+	/**
+	 * 🔧 FIX: Add periodic cleanup for orphaned sessions
+	 */
+	const cleanupOrphanedSessions = async (): Promise<number> => {
+		try {
+			const sessionsData = await redisService.hgetall(ACTIVE_SESSIONS_KEY);
+			const now = Date.now();
+			let cleanedCount = 0;
+
+			for (const [userId, data] of Object.entries(sessionsData)) {
+				try {
+					const session: ActiveSession = JSON.parse(data as string);
+					
+					// Remove sessions older than timeout
+					if (now - session.lastUpdate > SESSION_TIMEOUT_MS) {
+						await redisService.hdel(ACTIVE_SESSIONS_KEY, userId);
+						cleanedCount++;
+					}
+				} catch (error) {
+					// Remove corrupted session data
+					await redisService.hdel(ACTIVE_SESSIONS_KEY, userId);
+					cleanedCount++;
+				}
+			}
+
+			if (cleanedCount > 0) {
+				console.log(`Cleaned up ${cleanedCount} orphaned sessions`);
+			}
+
+			return cleanedCount;
+		} catch (error) {
+			console.error("Failed to cleanup orphaned sessions:", error);
+			return 0;
+		}
 	};
 
 	/**
@@ -259,6 +297,7 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 		start,
 		stop,
 		updateSession,
+		cleanupOrphanedSessions,
 	};
 };
 

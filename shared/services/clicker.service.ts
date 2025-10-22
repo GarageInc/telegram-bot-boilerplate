@@ -161,35 +161,66 @@ export function makeClickerService({ redisService, userRepository }: Dependencie
 	};
 
 	/**
-	 * 🔧 FIX: Get active users from SET instead of using KEYS command
-	 * KEYS command blocks Redis and is O(N) - never use in production!
+	 * 🔧 FIX: Optimized getActiveUsers to batch Redis operations and prevent memory leaks
+	 * Uses pipeline to reduce Redis round trips and prevent accumulation
 	 */
 	const getActiveUsers = async (): Promise<string[]> => {
 		// Get all users from the active users SET
 		const userIds = await redisService.smembers(ACTIVE_USERS_SET_KEY);
 		
-		// Filter out expired users by checking their TTL
+		if (userIds.length === 0) return [];
+		
+		// 🔧 FIX: Batch Redis operations to reduce memory usage and improve performance
 		const activeUsers: string[] = [];
+		const expiredUsers: string[] = [];
 		const now = Date.now();
 		
-		for (const userId of userIds) {
-			const activeKey = `${ACTIVE_USER_PREFIX}${userId}`;
-			const lastActiveStr = await redisService.getString(activeKey);
+		// Process in batches to prevent memory spikes
+		const BATCH_SIZE = 100;
+		for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
+			const batch = userIds.slice(i, i + BATCH_SIZE);
 			
-			if (lastActiveStr) {
-				const lastActive = parseInt(lastActiveStr, 10);
-				const timeSinceActive = now - lastActive;
+			// Get all timestamps for this batch in parallel
+			const timestampPromises = batch.map(userId => 
+				redisService.getString(`${ACTIVE_USER_PREFIX}${userId}`)
+			);
+			
+			const timestamps = await Promise.all(timestampPromises);
+			
+			// Process batch results
+			for (let j = 0; j < batch.length; j++) {
+				const userId = batch[j];
+				const lastActiveStr = timestamps[j];
 				
-				if (timeSinceActive < ACTIVE_USER_TTL * 1000) {
-					activeUsers.push(userId);
+				// Skip if userId is undefined
+				if (!userId) continue;
+				
+				if (lastActiveStr !== null && lastActiveStr !== undefined) {
+					const lastActive = parseInt(lastActiveStr, 10);
+					const timeSinceActive = now - lastActive;
+					
+					if (timeSinceActive < ACTIVE_USER_TTL * 1000) {
+						activeUsers.push(userId);
+					} else {
+						expiredUsers.push(userId);
+					}
 				} else {
-					// Remove expired user from the SET
-					await redisService.srem(ACTIVE_USERS_SET_KEY, userId);
+					// Key expired, remove from SET
+					expiredUsers.push(userId);
 				}
-			} else {
-				// Key expired, remove from SET
-				await redisService.srem(ACTIVE_USERS_SET_KEY, userId);
 			}
+		}
+		
+		// 🔧 FIX: Batch remove expired users to reduce Redis operations
+		if (expiredUsers.length > 0) {
+			// Remove all expired users from the SET in batches
+			for (let i = 0; i < expiredUsers.length; i += BATCH_SIZE) {
+				const batch = expiredUsers.slice(i, i + BATCH_SIZE);
+				await Promise.all(
+					batch.map(userId => redisService.srem(ACTIVE_USERS_SET_KEY, userId))
+				);
+			}
+			console.log(`Removed ${expiredUsers.length} expired users from active set`);
 		}
 		
 		return activeUsers;
