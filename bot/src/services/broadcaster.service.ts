@@ -161,111 +161,119 @@ export const makeBroadcasterService = ({ bot, redisService, clickerService, lead
 	 * 🔧 FIX: Fixed recursive setTimeout pattern to prevent memory leaks
 	 */
 	const start = async (): Promise<void> => {
-		if (isRunning) {
-			console.warn("Broadcaster service already running");
-			return;
-		}
+		// 🔧 DISABLED: Broadcaster service for memory leak testing
+		// if (isRunning) {
+		// 	console.warn("Broadcaster service already running");
+		// 	return;
+		// }
 
-		isRunning = true;
-		consecutiveErrors = 0;
-		console.log("Broadcaster service started via 'start' method");
+		// isRunning = true;
+		// consecutiveErrors = 0;
+		// console.log("Broadcaster service started via 'start' method");
 
-		// 🔧 FIX: Use setInterval instead of recursive setTimeout to prevent memory leaks
-		const scheduleNextUpdate = (interval: number) => {
-			if (updateInterval) {
-				clearTimeout(updateInterval);
-			}
-			updateInterval = setTimeout(async () => {
-				if (!isRunning) {
-					console.log("Broadcaster service stopping, loop exiting");
-					return;
-				}
+		// // 🔧 FIX: Use setInterval instead of recursive setTimeout to prevent memory leaks
+		// const scheduleNextUpdate = (interval: number) => {
+		// 	if (updateInterval) {
+		// 		clearTimeout(updateInterval);
+		// 	}
+		// 	updateInterval = setTimeout(async () => {
+		// 		if (!isRunning) {
+		// 			console.log("Broadcaster service stopping, loop exiting");
+		// 			return;
+		// 		}
 
-				// Circuit breaker: Stop if too many consecutive errors
-				if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-					console.error(`🚨 Broadcaster circuit breaker triggered after ${consecutiveErrors} consecutive errors. Stopping service.`);
-					isRunning = false;
-					return;
-				}
+		// 		// Circuit breaker: Stop if too many consecutive errors
+		// 		if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+		// 			console.error(`🚨 Broadcaster circuit breaker triggered after ${consecutiveErrors} consecutive errors. Stopping service.`);
+		// 			isRunning = false;
+		// 			return;
+		// 		}
 
-				try {
-					const sessions = await getActiveSessions();
-					const nextInterval = calculateUpdateInterval(sessions.length);
+		// 		try {
+		// 			const sessions = await getActiveSessions();
+		// 			const nextInterval = calculateUpdateInterval(sessions.length);
 
-					if (sessions.length > 0) {
-						console.log(`Broadcasting update to ${sessions.length} sessions (interval: ${nextInterval}ms)`);
-						await broadcastUpdate();
-						consecutiveErrors = 0; // Reset error counter on success
-					}
+		// 			if (sessions.length > 0) {
+		// 				console.log(`Broadcasting update to ${sessions.length} sessions (interval: ${nextInterval}ms)`);
+		// 				await broadcastUpdate();
+		// 				consecutiveErrors = 0; // Reset error counter on success
+		// 			}
 
-					// Schedule next update
-					if (isRunning) {
-						scheduleNextUpdate(nextInterval);
-					}
-				} catch (error) {
-					consecutiveErrors++;
-					console.error(`Broadcaster updateLoop error (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}):`, error);
+		// 			// Schedule next update
+		// 			if (isRunning) {
+		// 				scheduleNextUpdate(nextInterval);
+		// 			}
+		// 		} catch (error) {
+		// 			consecutiveErrors++;
+		// 			console.error(`Broadcaster updateLoop error (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}):`, error);
 					
-					// Still schedule next update but with backoff
-					if (isRunning && consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
-						const backoffInterval = BASE_UPDATE_INTERVAL_MS * Math.pow(2, consecutiveErrors);
-						console.log(`Retrying in ${backoffInterval}ms with exponential backoff`);
-						scheduleNextUpdate(Math.min(backoffInterval, MAX_UPDATE_INTERVAL_MS));
-					}
-				}
-			}, interval);
-		};
+		// 			// Still schedule next update but with backoff
+		// 			if (isRunning && consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
+		// 				const backoffInterval = BASE_UPDATE_INTERVAL_MS * Math.pow(2, consecutiveErrors);
+		// 				console.log(`Retrying in ${backoffInterval}ms with exponential backoff`);
+		// 				scheduleNextUpdate(Math.min(backoffInterval, MAX_UPDATE_INTERVAL_MS));
+		// 			}
+		// 		}
+		// 	}, interval);
+		// };
 
-		// Start with base interval
-		scheduleNextUpdate(BASE_UPDATE_INTERVAL_MS);
+		// // Start with base interval
+		// scheduleNextUpdate(BASE_UPDATE_INTERVAL_MS);
+		
+		console.log("🚫 Broadcaster service disabled for memory leak testing");
 	};
 
 	/**
 	 * Stop the broadcaster service.
 	 */
 	const stop = async (): Promise<void> => {
-		isRunning = false;
-		if (updateInterval) {
-			clearTimeout(updateInterval);
-			updateInterval = null;
-		}
-		console.log("Broadcaster service stopped");
+		// 🔧 DISABLED: Broadcaster service for memory leak testing
+		// isRunning = false;
+		// if (updateInterval) {
+		// 	clearTimeout(updateInterval);
+		// 	updateInterval = null;
+		// }
+		console.log("🚫 Broadcaster service already disabled");
 	};
 
 	/**
 	 * 🔧 FIX: Add periodic cleanup for orphaned sessions
 	 */
 	const cleanupOrphanedSessions = async (): Promise<number> => {
-		try {
-			const sessionsData = await redisService.hgetall(ACTIVE_SESSIONS_KEY);
-			const now = Date.now();
-			let cleanedCount = 0;
+		// 🔧 DISABLED: Cleanup for memory leak testing
+		// try {
+		// 	const sessionsData = await redisService.hgetall(ACTIVE_SESSIONS_KEY);
+		// 	const now = Date.now();
+		// 	let cleanedCount = 0;
 
-			for (const [userId, data] of Object.entries(sessionsData)) {
-				try {
-					const session: ActiveSession = JSON.parse(data as string);
+		// 	for (const [userId, data] of Object.entries(sessionsData)) {
+		// 		try {
+		// 			const session: ActiveSession = JSON.parse(data as string);
 					
-					// Remove sessions older than timeout
-					if (now - session.lastUpdate > SESSION_TIMEOUT_MS) {
-						await redisService.hdel(ACTIVE_SESSIONS_KEY, userId);
-						cleanedCount++;
-					}
-				} catch (error) {
-					// Remove corrupted session data
-					await redisService.hdel(ACTIVE_SESSIONS_KEY, userId);
-					cleanedCount++;
-				}
-			}
+		// 			// Remove sessions older than timeout
+		// 			if (now - session.lastUpdate > SESSION_TIMEOUT_MS) {
+		// 				await redisService.hdel(ACTIVE_SESSIONS_KEY, userId);
+		// 				cleanedCount++;
+		// 			}
+		// 		} catch (error) {
+		// 			// Remove corrupted session data
+		// 			await redisService.hdel(ACTIVE_SESSIONS_KEY, userId);
+		// 			cleanedCount++;
+		// 		}
+		// 	}
 
-			if (cleanedCount > 0) {
-				console.log(`Cleaned up ${cleanedCount} orphaned sessions`);
-			}
+		// 	if (cleanedCount > 0) {
+		// 		console.log(`Cleaned up ${cleanedCount} orphaned sessions`);
+		// 	}
 
-			return cleanedCount;
-		} catch (error) {
-			console.error("Failed to cleanup orphaned sessions:", error);
-			return 0;
-		}
+		// 	return cleanedCount;
+		// } catch (error) {
+		// 	console.error("Failed to cleanup orphaned sessions:", error);
+		// 	return 0;
+		// }
+		
+		console.log("🚫 Session cleanup disabled for memory leak testing");
+		return 0;
 	};
 
 	/**

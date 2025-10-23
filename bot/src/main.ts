@@ -231,20 +231,23 @@ const broadcasterService = makeBroadcasterService({
 });
 deps.broadcasterService = broadcasterService;
 
-// Start periodic sync for active users
-deps.clickerService.startPeriodicSync();
+// 🔧 DISABLED: Start periodic sync for active users
+// deps.clickerService.startPeriodicSync();
+console.log("🚫 Periodic sync disabled for memory leak testing");
 
-// Initialize memory monitor
-memoryMonitor = createMemoryMonitor({
-	maxSamples: 120, // Keep 2 hours of data (at 1 min intervals)
-	intervalMs: 60000, // Sample every minute
-	alertThresholdMB: 400, // Alert at 400MB (adjust based on your server's RAM)
-	onAlert: (stats: any, message: string) => {
-		console.error(message);
-		// Send alert to Slack if configured
-		deps.slackService.sendMessage(`🚨 Bot Memory Alert\n\n${message}\n\nHeap Used: ${(stats.heapUsed / 1024 / 1024).toFixed(2)} MB`).catch(noop);
-	},
-});
+// 🔧 DISABLED: Initialize memory monitor
+// memoryMonitor = createMemoryMonitor({
+// 	maxSamples: 120, // Keep 2 hours of data (at 1 min intervals)
+// 	intervalMs: 60000, // Sample every minute
+// 	alertThresholdMB: 400, // Alert at 400MB (adjust based on your server's RAM)
+// 	onAlert: (stats: any, message: string) => {
+// 		console.error(message);
+// 		// Send alert to Slack if configured
+// 		deps.slackService.sendMessage(`🚨 Bot Memory Alert\n\n${message}\n\nHeap Used: ${(stats.heapUsed / 1024 / 1024).toFixed(2)} MB`).catch(noop);
+// 	},
+// });
+console.log("🚫 Memory monitoring disabled for memory leak testing");
+memoryMonitor = undefined;
 
 const sender: { client: TelegramClient | undefined } = { client: undefined };
 
@@ -330,26 +333,28 @@ if (ENABLE_WEBHOOKS) {
 	console.log(`HTTP server listening on port ${PORT}`);
 	console.log(`Bot ${botInfo.first_name} (@${botInfo.username}) started in webhook mode`);
 
-	// Start broadcaster service
-	await deps.broadcasterService.start();
-	console.log("Broadcaster service started in webhook mode");
+	// 🔧 DISABLED: Start broadcaster service
+	// await deps.broadcasterService.start();
+	console.log("🚫 Broadcaster service disabled for memory leak testing");
 
-	// Warm up the clicker cache asynchronously (non-blocking)
-	if (ENABLE_CACHE_WARMING) {
-		console.log("Starting cache warming in background...");
-		deps.clickerService.warmCache(CACHE_WARMING_BATCH_SIZE).catch((err: Error) => {
-			console.error("Failed to warm clicker cache:", err);
-			deps.slackService.sendMessage(`Cache warming failed: ${err.message}`).catch(noop);
-		});
-	} else {
-		console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
-	}
+	// 🔧 DISABLED: Warm up the clicker cache asynchronously (non-blocking)
+	// if (ENABLE_CACHE_WARMING) {
+	// 	console.log("Starting cache warming in background...");
+	// 	deps.clickerService.warmCache(CACHE_WARMING_BATCH_SIZE).catch((err: Error) => {
+	// 		console.error("Failed to warm clicker cache:", err);
+	// 		deps.slackService.sendMessage(`Cache warming failed: ${err.message}`).catch(noop);
+	// 	});
+	// } else {
+	// 	console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
+	// }
+	console.log("🚫 Cache warming disabled for memory leak testing");
 
-	// Start memory monitoring
-	if (memoryMonitor) {
-		memoryMonitor.startMonitoring();
-		console.log("Memory monitoring started");
-	}
+	// 🔧 DISABLED: Start memory monitoring
+	// if (memoryMonitor) {
+	// 	memoryMonitor.startMonitoring();
+	// 	console.log("Memory monitoring started");
+	// }
+	console.log("🚫 Memory monitoring disabled for memory leak testing");
 
 	// Store server reference for shutdown
 	(globalThis as any).__bunServer = server;
@@ -357,26 +362,28 @@ if (ENABLE_WEBHOOKS) {
 	bot.start({
 		onStart: async botInfo => {
 			console.log(`Bot ${botInfo.first_name} (@${botInfo.username}) started in long-polling mode`);
-			// Start broadcaster service
-			await deps.broadcasterService.start();
-			console.log("Broadcaster service started in long-polling mode");
+			// 🔧 DISABLED: Start broadcaster service
+			// await deps.broadcasterService.start();
+			console.log("🚫 Broadcaster service disabled for memory leak testing");
 
-			// Warm up the clicker cache asynchronously (non-blocking)
-			if (ENABLE_CACHE_WARMING) {
-				console.log("Starting cache warming in background...");
-				deps.clickerService.warmCache(CACHE_WARMING_BATCH_SIZE).catch((err: Error) => {
-					console.error("Failed to warm clicker cache:", err);
-					deps.slackService.sendMessage(`Cache warming failed: ${err.message}`).catch(noop);
-				});
-			} else {
-				console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
-			}
+			// 🔧 DISABLED: Warm up the clicker cache asynchronously (non-blocking)
+			// if (ENABLE_CACHE_WARMING) {
+			// 	console.log("Starting cache warming in background...");
+			// 	deps.clickerService.warmCache(CACHE_WARMING_BATCH_SIZE).catch((err: Error) => {
+			// 		console.error("Failed to warm clicker cache:", err);
+			// 		deps.slackService.sendMessage(`Cache warming failed: ${err.message}`).catch(noop);
+			// 	});
+			// } else {
+			// 	console.log("Cache warming disabled (ENABLE_CACHE_WARMING=false)");
+			// }
+			console.log("🚫 Cache warming disabled for memory leak testing");
 
-			// Start memory monitoring
-			if (memoryMonitor) {
-				memoryMonitor.startMonitoring();
-				console.log("Memory monitoring started");
-			}
+			// 🔧 DISABLED: Start memory monitoring
+			// if (memoryMonitor) {
+			// 	memoryMonitor.startMonitoring();
+			// 	console.log("Memory monitoring started");
+			// }
+			console.log("🚫 Memory monitoring disabled for memory leak testing");
 		},
 	});
 }
@@ -406,22 +413,26 @@ async function shutdown(signal: string) {
 	console.log("Stopping broadcaster service...");
 	promises.push(deps.broadcasterService.stop().catch(noop));
 
-	console.log("Stopping periodic sync...");
-	deps.clickerService.stopPeriodicSync();
+	// 🔧 DISABLED: Stopping periodic sync...
+	// console.log("Stopping periodic sync...");
+	// deps.clickerService.stopPeriodicSync();
+	console.log("🚫 Periodic sync already disabled");
 
-	if (memoryMonitor) {
-		const monitor = memoryMonitor; // Capture for type narrowing
-		console.log("Stopping memory monitor...");
-		monitor.stopMonitoring();
+	// 🔧 DISABLED: Memory monitor shutdown
+	// if (memoryMonitor) {
+	// 	const monitor = memoryMonitor; // Capture for type narrowing
+	// 	console.log("Stopping memory monitor...");
+	// 	monitor.stopMonitoring();
 
-		// Log final memory statistics
-		const summary = monitor.getSummary();
-		console.log("Final memory statistics:");
-		console.log(`  Current: ${summary.currentMemoryMB.toFixed(2)} MB`);
-		console.log(`  Average: ${summary.avgMemoryMB.toFixed(2)} MB`);
-		console.log(`  Max: ${summary.maxMemoryMB.toFixed(2)} MB`);
-		console.log(`  Min: ${summary.minMemoryMB.toFixed(2)} MB`);
-	}
+	// 	// Log final memory statistics
+	// 	const summary = monitor.getSummary();
+	// 	console.log("Final memory statistics:");
+	// 	console.log(`  Current: ${summary.currentMemoryMB.toFixed(2)} MB`);
+	// 	console.log(`  Average: ${summary.avgMemoryMB.toFixed(2)} MB`);
+	// 	console.log(`  Max: ${summary.maxMemoryMB.toFixed(2)} MB`);
+	// 	console.log(`  Min: ${summary.minMemoryMB.toFixed(2)} MB`);
+	// }
+	console.log("🚫 Memory monitor already disabled");
 
 	// Disconnect MongoDB
 	console.log("Stopping MongoDB...");

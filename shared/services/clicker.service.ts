@@ -267,15 +267,17 @@ export function makeClickerService({ redisService, userRepository }: Dependencie
 	};
 
 	const startPeriodicSync = (): void => {
-		if (syncIntervalId !== null) {
-			console.warn("Periodic sync already running");
-			return;
-		}
+		// 🔧 DISABLED: Periodic sync for memory leak testing
+		// if (syncIntervalId !== null) {
+		// 	console.warn("Periodic sync already running");
+		// 	return;
+		// }
 
-		console.log(`Starting periodic sync every ${SYNC_INTERVAL_MS}ms for active users`);
-		syncIntervalId = setInterval(() => {
-			syncActiveUsers().catch(err => console.error("Periodic sync failed:", err));
-		}, SYNC_INTERVAL_MS);
+		// console.log(`Starting periodic sync every ${SYNC_INTERVAL_MS}ms for active users`);
+		// syncIntervalId = setInterval(() => {
+		// 	syncActiveUsers().catch(err => console.error("Periodic sync failed:", err));
+		// }, SYNC_INTERVAL_MS);
+		console.log("🚫 Periodic sync disabled for memory leak testing");
 	};
 
 	const stopPeriodicSync = (): void => {
